@@ -54,7 +54,7 @@ This project focuses on building a scalable frontend architecture, clean UI/UX, 
 
 ⚙️ Installation
 
-git clone https://github.com/your-username/e-commerce.git
+git clone https://github.com/nmdat-03/e-commerce.git
 
 cd e-commerce
 
