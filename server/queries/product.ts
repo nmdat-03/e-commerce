@@ -1,18 +1,24 @@
 import prisma from "@/lib/prisma";
+
 /*----------------------------------------*/
 /*             GET ALL PRODUCTS           */
 /*----------------------------------------*/
 type GetProductsParams = {
   searchQuery?: string;
   sort?: string;
-  categoryId?: string;
+  categorySlug?: string;
+  brandSlug?: string;
 };
 
 export async function getProducts({
   searchQuery,
   sort,
-  categoryId,
+  categorySlug,
+  brandSlug,
 }: GetProductsParams) {
+  const categorySlugs = categorySlug?.split(",");
+  const brandSlugs = brandSlug?.split(",");
+
   const where = {
     ...(searchQuery && {
       name: {
@@ -20,7 +26,20 @@ export async function getProducts({
         mode: "insensitive" as const,
       },
     }),
-    ...(categoryId && { categoryId }),
+    ...(categorySlugs?.length && {
+      category: {
+        slug: {
+          in: categorySlugs,
+        },
+      },
+    }),
+    ...(brandSlugs?.length && {
+      brand: {
+        slug: {
+          in: brandSlugs,
+        },
+      },
+    }),
   };
 
   const orderBy =
@@ -35,6 +54,7 @@ export async function getProducts({
       where,
       include: {
         images: true,
+        brand: true,
       },
       orderBy,
     }),

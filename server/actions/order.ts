@@ -10,6 +10,9 @@ type CreateOrderInput = {
   productIds: string[];
 };
 
+/*----------------------------------------*/
+/*              CREATE ORDER              */
+/*----------------------------------------*/
 export async function createOrder(data: CreateOrderInput) {
   const user = await getCurrentUser();
 

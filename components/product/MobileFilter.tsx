@@ -5,7 +5,20 @@ import FilterSidebar from "./FilterSidebar";
 import { Funnel, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function MobileFilter() {
+type Props = {
+    categories: {
+        id: string;
+        name: string;
+        slug: string;
+    }[];
+    brands: {
+        id: string;
+        name: string;
+        slug: string;
+    }[];
+};
+
+export default function MobileFilter({ categories, brands }: Props) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -25,7 +38,7 @@ export default function MobileFilter() {
             {/* BUTTON */}
             <button
                 onClick={() => setOpen(true)}
-                className="lg:hidden border px-4 py-2 rounded-lg text-sm flex gap-2 items-center shadow-sm hover:bg-gray-50 transition"
+                className="lg:hidden bg-white border px-4 py-2 rounded-lg text-sm flex gap-2 items-center shadow-sm"
             >
                 <Funnel size={16} />
                 Filter
@@ -53,11 +66,11 @@ export default function MobileFilter() {
                             className="fixed left-0 top-0 h-full w-[80%] max-w-sm bg-white z-50 shadow-xl p-4 flex flex-col"
                         >
                             {/* HEADER */}
-                            <div className="flex items-center justify-between mb-4 border-b pb-2">
+                            <div className="flex items-center justify-between mb-2 border-b pb-2">
                                 <h2 className="font-semibold text-lg">Filters</h2>
                                 <button
                                     onClick={() => setOpen(false)}
-                                    className="p-2 rounded-md hover:bg-gray-100"
+                                    className="p-2 border rounded-md"
                                 >
                                     <X size={18} />
                                 </button>
@@ -65,7 +78,11 @@ export default function MobileFilter() {
 
                             {/* CONTENT */}
                             <div className="overflow-y-auto">
-                                <FilterSidebar />
+                                <FilterSidebar
+                                    categories={categories}
+                                    brands={brands}
+                                    onApply={() => setOpen(false)}
+                                />
                             </div>
                         </motion.div>
                     </>

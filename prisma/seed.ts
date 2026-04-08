@@ -19,9 +19,24 @@ async function main() {
     ),
   );
 
+  // ===== BRAND =====
+  const brands = await Promise.all(
+    ["brand-1", "brand-2", "brand-3"].map((slug, i) =>
+      prisma.brand.upsert({
+        where: { slug },
+        update: {},
+        create: {
+          name: `Brand ${i + 1}`,
+          slug,
+        },
+      }),
+    ),
+  );
+
   // ===== PRODUCT =====
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 30; i++) {
     const category = categories[i % categories.length];
+    const brand = brands[i % brands.length];
 
     await prisma.product.upsert({
       where: { slug: `product-${i}` },
@@ -29,10 +44,11 @@ async function main() {
       create: {
         name: `Product ${i}`,
         slug: `product-${i}`,
-        description: `This is description for Product ${i}`,
-        price: 10 * i,
+        description: `This is description of Product ${i}`,
+        price: (Math.floor(Math.random() * 20) + 1) * 5,
         stock: 100,
         categoryId: category.id,
+        brandId: brand.id,
         images: {
           create: [
             {

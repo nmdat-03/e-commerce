@@ -3,6 +3,9 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+/*----------------------------------------*/
+/*            GET ALL ADDRESSES           */
+/*----------------------------------------*/
 export async function getAddresses() {
   const { userId } = await auth();
 
@@ -20,6 +23,9 @@ export async function getAddresses() {
   });
 }
 
+/*----------------------------------------*/
+/*            CREATE ADDRESS              */
+/*----------------------------------------*/
 export async function createAddress(data: any) {
   const { userId } = await auth();
 
@@ -39,6 +45,9 @@ export async function createAddress(data: any) {
   });
 }
 
+/*----------------------------------------*/
+/*            UPDATE ADDRESS              */
+/*----------------------------------------*/
 export async function updateAddress(id: string, data: any) {
   if (data.setDefault) {
     const { userId } = await auth();
@@ -64,6 +73,9 @@ export async function updateAddress(id: string, data: any) {
   });
 }
 
+/*----------------------------------------*/
+/*            DELETE ADDRESS              */
+/*----------------------------------------*/
 export async function deleteAddress(id: string) {
   const { userId } = await auth();
 

@@ -71,6 +71,9 @@ model Product {
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])
 
+  brandId String?
+  brand   Brand?  @relation(fields: [brandId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -79,6 +82,7 @@ model Product {
 
   @@index([name])
   @@index([categoryId])
+  @@index([brandId])
 }
 
 model ProductImage {
@@ -97,6 +101,14 @@ model ProductImage {
 }
 
 model Category {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  products Product[]
+}
+
+model Brand {
   id   String @id @default(cuid())
   name String @unique
   slug String @unique

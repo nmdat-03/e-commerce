@@ -25,7 +25,7 @@ export default function SortBar() {
             <select
                 onChange={(e) => handleChange(e.target.value)}
                 value={searchParams.get("sort") || "newest"}
-                className="border border-black outline-none px-3 py-1 rounded-md text-sm"
+                className="bg-white border shadow-md outline-none px-3 py-2 rounded-md text-sm"
             >
                 <option value="newest">Newest</option>
                 <option value="price_asc">Price: Low → High</option>
