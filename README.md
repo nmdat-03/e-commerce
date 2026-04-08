@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🛒 E-Commerce Website
 
-## Getting Started
+A modern full-stack e-commerce web application built with Next.js, featuring product browsing, cart management, and a complete checkout flow.
 
-First, run the development server:
+This project focuses on building a scalable frontend architecture, clean UI/UX, and real-world e-commerce functionalities.
 
-```bash
+
+✨ Features
+
+🛍️ User Features
+
++ Browse product list with responsive UI
+
++ View product details
+
++ Add/remove items to cart
+
++ Update quantity in cart
+
++ Checkout flow
+
++ Authentication (Sign in / Sign up with Clerk)
+
+
+⚙️ System Features
+
++ Persistent cart using Zustand
+
++ Form validation with React Hook Form + Zod
+
++ Smooth UI animations (Framer Motion)
+
++ Reusable UI components with shadcn/ui
+
++ Server-side data fetching with Next.js
+
+
+🛠️ Tech Stack
+
++ Frontend: Next.js 15, React 19, TypeScript
+
++ Styling: TailwindCSS, shadcn/ui
+
++ State Management: Zustand
+
++ Forms & Validation: React Hook Form, Zod
+
++ Authentication: Clerk
+
++ Database: Prisma ORM + PostgreSQL
+
++ UI & Animation: Framer Motion, Radix UI, Lucide Icons
+
+
+⚙️ Installation
+
+git clone https://github.com/nmdat-03/e-commerce.git
+
+cd e-commerce
+
+npm install
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🔑 Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a .env file:
 
-## Learn More
+DATABASE_URL=""
 
-To learn more about Next.js, take a look at the following resources:
+NEXT_PUBLIC_CLERK_SIGN_IN_URL = /sign-in
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+NEXT_PUBLIC_CLERK_SIGN_UP_URL = /sign-up
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 
-## Deploy on Vercel
+CLERK_SECRET_KEY=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+CLERK_WEBHOOK_SECRET=
