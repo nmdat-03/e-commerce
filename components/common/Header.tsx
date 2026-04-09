@@ -1,3 +1,5 @@
+import CustomButton from "./CustomButton";
+
 export default function Header() {
     return (
         <section className="w-full py-16 md:min-h-[calc(100vh-64px)] flex items-center">
@@ -13,9 +15,9 @@ export default function Header() {
                         Discover premium products designed for modern living.
                     </p>
 
-                    <button className="px-6 py-3 bg-black text-white rounded-xl">
+                    <CustomButton className="px-6 py-3 bg-black text-white rounded-xl">
                         Shop Now
-                    </button>
+                    </CustomButton>
                 </div>
 
                 {/* Image */}

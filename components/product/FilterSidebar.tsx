@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import CustomButton from "../common/CustomButton";
+import clsx from "clsx";
 
 type Props = {
     categories: {
@@ -23,6 +25,8 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+
+    const isEmpty = selectedCategories.length === 0 && selectedBrands.length === 0;
 
     /*------------------------------*/
     /*      SYNC FROM URL           */
@@ -110,7 +114,7 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
                 <div className="border-t border-gray-300 my-3" />
 
                 {/* BRAND */}
-                <p className="font-medium mb-2 text-lg md:text-md">Brands</p>
+                <p className="font-medium text-lg md:text-md">Brands</p>
                 <div className="flex flex-col gap-4">
                     {brands.map((item) => (
                         <label key={item.id} className="flex gap-2">
@@ -130,19 +134,23 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
 
             {/* BUTTON */}
             <div className="flex gap-2 text-sm">
-                <button
+                <CustomButton
                     onClick={handleReset}
-                    className="w-1/2 border border-black py-2 rounded-md"
+                    disabled={isEmpty}
+                    className={clsx(
+                        "w-1/2 border border-black py-2 rounded-md",
+                        isEmpty && "opacity-50 cursor-not-allowed"
+                    )}
                 >
                     Reset
-                </button>
+                </CustomButton>
 
-                <button
+                <CustomButton
                     onClick={handleApply}
                     className="w-1/2 bg-black text-white py-2 rounded-md"
                 >
                     Apply
-                </button>
+                </CustomButton>
             </div>
         </div>
     );

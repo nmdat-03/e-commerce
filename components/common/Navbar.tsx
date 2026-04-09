@@ -8,6 +8,7 @@ import { useUser, SignInButton, SignOutButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import UserMenu from "./UserMenu";
 import SearchBar from "./SearchBar";
+import CustomButton from "./CustomButton";
 
 const menuItems = [
     { label: "Products", href: "/products" },
@@ -29,14 +30,6 @@ export default function Navbar() {
     useEffect(() => {
         setHydrated(true);
     }, []);
-
-    // const [mounted, setMounted] = useState(false);
-
-    // useEffect(() => {
-    //     setMounted(true);
-    // }, []);
-
-    // if (!mounted) return null;
 
     return (
         <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-white/20 shadow-sm">
@@ -100,7 +93,9 @@ export default function Navbar() {
                     {isLoaded && !isSignedIn && (
                         <div className="hidden md:flex items-center gap-2">
                             <SignInButton mode="modal">
-                                <button className="px-4 py-2 border-2 rounded-lg border-black bg-black text-white text-sm font-semibold">Login</button>
+                                <CustomButton className="px-4 py-2 border-2 rounded-lg border-black bg-black text-white text-sm font-semibold">
+                                    Login
+                                </CustomButton>
                             </SignInButton>
                         </div>
                     )}

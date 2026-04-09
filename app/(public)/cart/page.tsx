@@ -11,6 +11,7 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CartItem from "@/components/cart/CartItem";
+import CustomButton from "@/components/common/CustomButton";
 
 export default function CartPage() {
     const {
@@ -145,13 +146,13 @@ export default function CartPage() {
                 </div>
 
                 {/* CHECKOUT */}
-                <button
+                <CustomButton
                     disabled={selectedItems.length === 0}
                     onClick={handleCheckout}
                     className="w-full bg-black text-white py-3 rounded-lg disabled:opacity-50"
                 >
                     Checkout
-                </button>
+                </CustomButton>
             </div>
 
             {/* LOGIN MODAL */}
@@ -178,17 +179,17 @@ export default function CartPage() {
                             </p>
 
                             <div className="flex gap-3 pt-2">
-                                <button
+                                <CustomButton
                                     onClick={() => setShowLoginModal(false)}
-                                    className="flex-1 border py-2 rounded-lg hover:bg-gray-100"
+                                    className="flex-1 border border-black py-2 rounded-lg hover:bg-gray-100"
                                 >
                                     Back
-                                </button>
+                                </CustomButton>
 
                                 <SignInButton mode="modal">
-                                    <button className="flex-1 bg-black text-white py-2 rounded-lg">
+                                    <CustomButton className="flex-1 bg-black text-white py-2 rounded-lg">
                                         Login
-                                    </button>
+                                    </CustomButton>
                                 </SignInButton>
                             </div>
                         </motion.div>

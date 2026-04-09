@@ -1,19 +1,17 @@
 import Header from "@/components/common/Header";
 import ProductList from "@/components/product/ProductList";
-import { getProducts } from "@/server/queries/product";
+import { getNewestProducts } from "@/server/queries/product";
 
 
 export default async function HomePage() {
-    const { products } = await getProducts({
-        sort: "newest",
-    })
+    const products = await getNewestProducts(10)
 
     return (
         <div>
 
             <Header />
             <div className="container py-6">
-                <h2 className="text-xl font-semibold mb-4">Product List</h2>
+                <h2 className="text-xl font-semibold mb-4">Newest Products</h2>
                 <ProductList products={products} />
             </div>
 

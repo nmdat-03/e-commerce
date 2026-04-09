@@ -1,25 +1,29 @@
 import prisma from "@/lib/prisma";
 
 /*----------------------------------------*/
-/*             GET ALL PRODUCTS           */
+/*             TYPES                      */
 /*----------------------------------------*/
 type GetProductsParams = {
   searchQuery?: string;
-  sort?: string;
+  sort?: "price_asc" | "price_desc" | "newest";
   categorySlug?: string;
   brandSlug?: string;
+  page?: number;
+  limit?: number;
 };
 
-export async function getProducts({
+/*----------------------------------------*/
+/*        BUILD WHERE CONDITION           */
+/*----------------------------------------*/
+function buildWhere({
   searchQuery,
-  sort,
   categorySlug,
   brandSlug,
 }: GetProductsParams) {
-  const categorySlugs = categorySlug?.split(",");
-  const brandSlugs = brandSlug?.split(",");
+  const categorySlugs = categorySlug?.split(",").filter(Boolean);
+  const brandSlugs = brandSlug?.split(",").filter(Boolean);
 
-  const where = {
+  return {
     ...(searchQuery && {
       name: {
         contains: searchQuery,
@@ -41,13 +45,30 @@ export async function getProducts({
       },
     }),
   };
+}
 
-  const orderBy =
-    sort === "price_asc"
-      ? { price: "asc" as const }
-      : sort === "price_desc"
-        ? { price: "desc" as const }
-        : { createdAt: "desc" as const };
+/*----------------------------------------*/
+/*        BUILD ORDER BY                  */
+/*----------------------------------------*/
+function buildOrderBy(sort?: GetProductsParams["sort"]) {
+  if (sort === "price_asc") return { price: "asc" as const };
+  if (sort === "price_desc") return { price: "desc" as const };
+  return { createdAt: "desc" as const };
+}
+
+/*----------------------------------------*/
+/*             GET ALL PRODUCTS           */
+/*----------------------------------------*/
+export async function getProducts(params: GetProductsParams) {
+  await new Promise((res) => setTimeout(res, 300));
+
+  const { page, limit } = params;
+
+  const where = buildWhere(params);
+  const orderBy = buildOrderBy(params.sort);
+
+  const take = limit ?? undefined;
+  const skip = page && limit ? (page - 1) * limit : undefined;
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
@@ -57,6 +78,8 @@ export async function getProducts({
         brand: true,
       },
       orderBy,
+      take,
+      skip,
     }),
     prisma.product.count({
       where,
@@ -64,6 +87,20 @@ export async function getProducts({
   ]);
 
   return { products, total };
+}
+
+/*----------------------------------------*/
+/*        HOMEPAGE: NEWEST PRODUCTS       */
+/*----------------------------------------*/
+export async function getNewestProducts(limit = 10) {
+  return prisma.product.findMany({
+    take: limit,
+    orderBy: { createdAt: "desc" },
+    include: {
+      images: true,
+      brand: true,
+    },
+  });
 }
 
 /*----------------------------------------*/
@@ -85,7 +122,7 @@ export async function getProductById(id: string) {
 }
 
 /*----------------------------------------*/
-/*           GET PRODUCT BY SLUG          */
+/*         GET PRODUCT BY SLUG            */
 /*----------------------------------------*/
 export async function getProductBySlug(slug: string) {
   try {

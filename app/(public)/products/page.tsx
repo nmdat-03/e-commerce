@@ -5,6 +5,7 @@ import MobileFilter from "@/components/product/MobileFilter";
 import { getProducts } from "@/server/queries/product";
 import { getCategories } from "@/server/queries/category";
 import { getBrands } from "@/server/queries/brand";
+import CustomPagination from "@/components/common/CustomPagination";
 
 export default async function ProductsPage({
     searchParams,
@@ -14,24 +15,32 @@ export default async function ProductsPage({
         sort?: string;
         category?: string;
         brands?: string;
+        page?: string;
     }>;
 }) {
     const params = await searchParams;
 
     const q = params.q || "";
 
+    const page = Number(params.page) || 1;
+
+    const limit = 10;
+
     const [productData, categories, brands] = await Promise.all([
         getProducts({
             searchQuery: params.q,
-            sort: params.sort,
+            sort: params.sort as any,
             categorySlug: params.category,
             brandSlug: params.brands,
+            page,
+            limit,
         }),
         getCategories(),
         getBrands(),
     ]);
 
     const { products, total } = productData;
+    const totalPages = Math.ceil(total / limit);
 
     return (
         <div className="container py-6">
@@ -67,6 +76,12 @@ export default async function ProductsPage({
 
                     {/* PRODUCT LIST */}
                     <ProductList products={products} />
+
+                    {/* PAGINATION */}
+                    <CustomPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                    />
                 </div>
             </div>
         </div>
