@@ -11,6 +11,7 @@ export default function SortBar() {
     const handleChange = (value: string) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("sort", value);
+        params.set("page", "1")
 
         startTransition(() => {
             router.push(`?${params.toString()}`);

@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 
+export const PAGE_SIZE = 20;
+
 /*----------------------------------------*/
 /*             TYPES                      */
 /*----------------------------------------*/
@@ -59,34 +61,42 @@ function buildOrderBy(sort?: GetProductsParams["sort"]) {
 /*----------------------------------------*/
 /*             GET ALL PRODUCTS           */
 /*----------------------------------------*/
-export async function getProducts(params: GetProductsParams) {
-  await new Promise((res) => setTimeout(res, 300));
-
-  const { page, limit } = params;
-
+export async function getProducts({
+  page = 1,
+  limit = PAGE_SIZE,
+  ...params
+}: GetProductsParams) {
   const where = buildWhere(params);
   const orderBy = buildOrderBy(params.sort);
 
-  const take = limit ?? undefined;
-  const skip = page && limit ? (page - 1) * limit : undefined;
+  const take = limit;
+  const skip = (page - 1) * limit;
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: {
-        images: true,
-        brand: true,
-      },
-      orderBy,
-      take,
-      skip,
-    }),
-    prisma.product.count({
-      where,
-    }),
-  ]);
+  const products = await prisma.product.findMany({
+    where,
+    include: {
+      images: true,
+      brand: true,
+    },
+    orderBy,
+    take,
+    skip,
+  });
 
-  return { products, total };
+  return products;
+}
+
+/*----------------------------------------*/
+/*             GET PRODUCTS COUNT         */
+/*----------------------------------------*/
+export async function getProductsCount(params: GetProductsParams) {
+  const where = buildWhere(params);
+
+  const total = await prisma.product.count({
+    where,
+  });
+
+  return total;
 }
 
 /*----------------------------------------*/
@@ -113,6 +123,7 @@ export async function getProductById(id: string) {
       include: {
         category: true,
         images: true,
+        brand: true,
       },
     });
   } catch (error) {
@@ -131,6 +142,7 @@ export async function getProductBySlug(slug: string) {
       include: {
         category: true,
         images: true,
+        brand: true,
       },
     });
   } catch (error) {

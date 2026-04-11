@@ -11,14 +11,14 @@ type Props = {
         name: string;
         slug: string;
     }[];
-    brands: {
+    brand: {
         id: string;
         name: string;
         slug: string;
     }[];
 };
 
-export default function MobileFilter({ categories, brands }: Props) {
+export default function MobileFilter({ categories, brand }: Props) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -80,7 +80,7 @@ export default function MobileFilter({ categories, brands }: Props) {
                             <div className="overflow-y-auto">
                                 <FilterSidebar
                                     categories={categories}
-                                    brands={brands}
+                                    brand={brand}
                                     onApply={() => setOpen(false)}
                                 />
                             </div>

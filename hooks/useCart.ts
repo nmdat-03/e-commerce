@@ -10,6 +10,7 @@ export const useCart = () => {
       increaseQuantity: state.increaseQuantity,
       decreaseQuantity: state.decreaseQuantity,
       clearCart: state.clearCart,
+      updateItem: state.updateItem,
       removeSelectedItems: state.removeSelectedItems,
       toggleSelect: state.toggleSelect,
       toggleSelectAll: state.toggleSelectAll,

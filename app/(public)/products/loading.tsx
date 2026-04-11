@@ -7,7 +7,7 @@ export default function Loading() {
 
                 {/* FILTER */}
                 <div className="hidden lg:block w-1/4">
-                    <Skeleton className="h-125 w-full rounded-xl" />
+                    <Skeleton className="h-125 w-full bg-white rounded-xl" />
                 </div>
 
                 {/* RIGHT */}
@@ -37,7 +37,6 @@ export default function Loading() {
                                 <div className="mt-3 space-y-2">
                                     <Skeleton className="h-4 w-full" />
                                     <Skeleton className="h-4 w-2/3" />
-                                    <Skeleton className="h-5 w-1/2" />
                                 </div>
                             </div>
                         ))}

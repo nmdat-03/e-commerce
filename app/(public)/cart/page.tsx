@@ -22,11 +22,13 @@ export default function CartPage() {
         totalPrice,
         toggleSelect,
         toggleSelectAll,
+        updateItem,
     } = useCart();
 
     const router = useRouter();
     const { isSignedIn } = useUser();
 
+    const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     /* ---------------- SELECT ---------------- */
@@ -40,47 +42,80 @@ export default function CartPage() {
         [items]
     );
 
+    const setLoading = (id: string, value: boolean) => {
+        setLoadingIds((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
     /* ---------------- ACTIONS ---------------- */
     const handleRemove = async (id: string) => {
+        if (loadingIds[id]) return;
+
         try {
+            setLoading(id, true);
+
             if (isSignedIn) {
                 const res = await removeCartItem(id);
-
-                if (res?.error) {
-                    console.error("Remove failed:", res.error);
-                    return;
-                }
+                if (res?.error) return;
             }
 
             removeFromCart(id);
         } catch (e) {
             console.error(e);
+        } finally {
+            setLoading(id, false);
         }
     };
 
     const handleIncrease = async (id: string) => {
+        if (loadingIds[id]) return;
+
         try {
+            setLoading(id, true);
+
             if (isSignedIn) {
                 const res = await increaseCartItem(id);
-                if (res?.error) return;
-            }
 
-            increaseQuantity(id);
+                if (res?.error) return;
+
+                if (res?.success) {
+                    updateItem(res.item);
+                    return;
+                }
+            } else {
+                increaseQuantity(id);
+            }
         } catch (e) {
             console.error(e);
+        } finally {
+            setLoading(id, false);
         }
     };
 
     const handleDecrease = async (id: string) => {
+        if (loadingIds[id]) return;
+
         try {
+            setLoading(id, true);
+
             if (isSignedIn) {
                 const res = await decreaseCartItem(id);
-                if (res?.error) return;
-            }
 
-            decreaseQuantity(id);
+                if (res?.error) return;
+
+                if (res?.success) {
+                    updateItem(res.item);
+                    return;
+                }
+            } else {
+                decreaseQuantity(id);
+            }
         } catch (e) {
             console.error(e);
+        } finally {
+            setLoading(id, false);
         }
     };
 
@@ -121,6 +156,7 @@ export default function CartPage() {
                         type="checkbox"
                         checked={allSelected}
                         onChange={toggleSelectAll}
+                        className="w-5 h-5 accent-black"
                     />
                     <span>Select all</span>
                 </div>
@@ -135,6 +171,7 @@ export default function CartPage() {
                             onDecrease={handleDecrease}
                             onRemove={handleRemove}
                             onToggle={toggleSelect}
+                            loading={!!loadingIds[item.id]}
                         />
                     ))}
                 </div>

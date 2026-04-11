@@ -9,6 +9,7 @@ export type CartItem = {
   image?: string;
   quantity: number;
   selected: boolean;
+  stock?: number;
 };
 
 type CartStore = {
@@ -27,6 +28,7 @@ type CartStore = {
   removeSelectedItems: () => void;
   clearCart: () => void;
   setCart: (items: CartItem[]) => void;
+  updateItem: (item: { id: string; quantity: number; stock?: number }) => void;
 
   toggleSelect: (id: string) => void;
   toggleSelectAll: () => void;
@@ -49,6 +51,13 @@ export const useCartStore = create<CartStore>()(
         const existing = items.find((i) => i.productId === item.productId);
 
         if (existing) {
+          if (
+            existing.stock !== undefined &&
+            existing.quantity >= existing.stock
+          ) {
+            return;
+          }
+
           const updatedItem = {
             ...existing,
             quantity: existing.quantity + 1,
@@ -72,6 +81,7 @@ export const useCartStore = create<CartStore>()(
                 image: item.image,
                 quantity: item.quantity ?? 1,
                 selected: item.selected ?? true,
+                stock: item.stock,
               },
               ...items,
             ],
@@ -119,7 +129,6 @@ export const useCartStore = create<CartStore>()(
       removeSelectedItems: () =>
         set((state) => ({
           items: state.items.filter((item) => !item.selected),
-          // .map((item) => ({ ...item, selected: false })),
         })),
 
       /*------------------------------*/
@@ -127,9 +136,17 @@ export const useCartStore = create<CartStore>()(
       /*------------------------------*/
       increaseQuantity: (id) => {
         set({
-          items: get().items.map((i) =>
-            i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
-          ),
+          items: get().items.map((i) => {
+            if (i.id !== id) return i;
+
+            const nextQty = i.quantity + 1;
+
+            if (i.stock !== undefined && nextQty > i.stock) {
+              return i;
+            }
+
+            return { ...i, quantity: nextQty };
+          }),
         });
       },
 
@@ -157,7 +174,33 @@ export const useCartStore = create<CartStore>()(
       /*-----------------------*/
       /*       SET CART        */
       /*-----------------------*/
-      setCart: (items) => set({ items }),
+      setCart: (items) =>
+        set({
+          items: items.map((item) => ({
+            ...item,
+            quantity:
+              item.stock !== undefined && item.quantity > item.stock
+                ? item.stock
+                : item.quantity,
+            stock: item.stock,
+          })),
+        }),
+
+      /*--------------------------*/
+      /*       UPDATE ITEM        */
+      /*--------------------------*/
+      updateItem: (item: { id: string; quantity: number; stock?: number }) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === item.id
+              ? {
+                  ...i,
+                  quantity: item.quantity,
+                  stock: item.stock,
+                }
+              : i,
+          ),
+        })),
 
       /*------------------------*/
       /*       TOTAL PRICE      */

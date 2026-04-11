@@ -32,7 +32,7 @@ const ProductGallery = forwardRef<HTMLDivElement, Props>(
                 {/* Main Image */}
                 <div className="w-full bg-gray-200 rounded-xl overflow-hidden flex justify-center">
                     <div
-                        ref={ref} // 🔥 GẮN Ở ĐÂY
+                        ref={ref}
                         className="relative w-full max-w-md aspect-square"
                     >
                         <Image

@@ -9,35 +9,47 @@ export default function CartSync() {
     const { isSignedIn } = useUser();
     const setCart = useCartStore((state) => state.setCart);
 
-    const wasSignedIn = useRef(false);
+    const wasSignedIn = useRef<boolean | null>(null);
+    const isSyncing = useRef(false);
 
     useEffect(() => {
         const isLoggedIn = !!isSignedIn;
 
-
         const sync = async () => {
-            const { items, clearCart } = useCartStore.getState();
+            if (isSyncing.current) return;
+            isSyncing.current = true;
 
             try {
-                if (!wasSignedIn.current && isLoggedIn && items.length > 0) {
+                const store = useCartStore.getState();
+                const items = store.items;
+                const clearCart = store.clearCart;
+
+                if (wasSignedIn.current === false && isLoggedIn && items.length > 0) {
                     await mergeCart(items);
+
+                    const dbCart = await getCart();
+                    setCart(dbCart);
+
                     clearCart();
                 }
 
-                if (isLoggedIn) {
+                else if (isLoggedIn) {
                     const dbCart = await getCart();
                     setCart(dbCart);
                 }
+
+                else if (!isLoggedIn) {
+                    clearCart();
+                }
             } catch (error) {
                 console.error("Cart sync error:", error);
+            } finally {
+                isSyncing.current = false;
+                wasSignedIn.current = isLoggedIn;
             }
-
-            wasSignedIn.current = isLoggedIn;
         };
 
         sync();
-
-
     }, [isSignedIn, setCart]);
 
     return null;

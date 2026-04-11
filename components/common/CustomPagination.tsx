@@ -76,55 +76,61 @@ export default function CustomPagination({
     const pages = getPages();
 
     return (
-        <Pagination className="mt-6"> <PaginationContent>
+        <Pagination className="mt-6">
+            <PaginationContent>
 
-            {/* PREVIOUS */}
-            <PaginationItem>
-                <PaginationPrevious
-                    onClick={() =>
-                        currentPage > 1 && handleNavigate(currentPage - 1)
-                    }
-                    className={
-                        currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                    }
-                />
-            </PaginationItem>
-
-            {/* PAGE NUMBERS */}
-            {pages.map((page, index) => (
-                <PaginationItem key={index}>
-                    {page === "..." ? (
-                        <PaginationEllipsis />
-                    ) : (
-                        <PaginationLink
-                            isActive={page === currentPage}
-                            onClick={() => handleNavigate(page)}
-                            className="cursor-pointer"
-                        >
-                            {page}
-                        </PaginationLink>
-                    )}
+                {/* PREVIOUS */}
+                <PaginationItem>
+                    <PaginationPrevious
+                        onClick={() =>
+                            currentPage > 1 && handleNavigate(currentPage - 1)
+                        }
+                        className={
+                            currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                        }
+                    />
                 </PaginationItem>
-            ))}
 
-            {/* NEXT */}
-            <PaginationItem>
-                <PaginationNext
-                    onClick={() =>
-                        currentPage < totalPages &&
-                        handleNavigate(currentPage + 1)
-                    }
-                    className={
-                        currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                    }
-                />
-            </PaginationItem>
+                {/* PAGE NUMBERS */}
+                {pages.map((page, index) => (
+                    <PaginationItem key={index}>
+                        {page === "..." ? (
+                            <PaginationEllipsis />
+                        ) : (
+                            <PaginationLink
+                                isActive={page === currentPage}
+                                onClick={() => handleNavigate(page)}
+                                className={`cursor-pointer 
+                                ${page === currentPage
+                                        ? "bg-black text-white hover:bg-black hover:text-white"
+                                        : "bg-white hover:bg-white/70"
+                                    }`
+                                }
+                            >
+                                {page}
+                            </PaginationLink>
+                        )}
+                    </PaginationItem>
+                ))}
 
-        </PaginationContent>
+                {/* NEXT */}
+                <PaginationItem>
+                    <PaginationNext
+                        onClick={() =>
+                            currentPage < totalPages &&
+                            handleNavigate(currentPage + 1)
+                        }
+                        className={
+                            currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                        }
+                    />
+                </PaginationItem>
+
+            </PaginationContent>
         </Pagination>
 
 

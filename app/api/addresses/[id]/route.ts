@@ -31,7 +31,6 @@ export async function PATCH(
     /*            SET DEFAULT CASE            */
     /*----------------------------------------*/
     if (body.setDefault) {
-      // reset tất cả address về false
       await prisma.address.updateMany({
         where: { userId: user.id },
         data: { isDefault: false },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import CustomButton from "../common/CustomButton";
 import clsx from "clsx";
@@ -11,7 +11,7 @@ type Props = {
         name: string;
         slug: string;
     }[];
-    brands: {
+    brand: {
         id: string;
         name: string;
         slug: string;
@@ -19,9 +19,10 @@ type Props = {
     onApply?: () => void;
 };
 
-export default function FilterSidebar({ categories, brands, onApply }: Props) {
+export default function FilterSidebar({ categories, brand, onApply }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [isPending, startTransition] = useTransition();
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -33,7 +34,7 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
     /*------------------------------*/
     useEffect(() => {
         const categoryFromUrl = searchParams.get("category")?.split(",") || [];
-        const brandFromUrl = searchParams.get("brands")?.split(",") || [];
+        const brandFromUrl = searchParams.get("brand")?.split(",") || [];
 
         setSelectedCategories(categoryFromUrl);
         setSelectedBrands(brandFromUrl);
@@ -64,12 +65,16 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
         }
 
         if (selectedBrands.length > 0) {
-            params.set("brands", selectedBrands.join(","));
+            params.set("brand", selectedBrands.join(","));
         } else {
-            params.delete("brands");
+            params.delete("brand");
         }
 
-        router.push(`/products?${params.toString()}`);
+        params.set("page", "1")
+
+        startTransition(() => {
+            router.push(`/products?${params.toString()}`);
+        });
 
         onApply?.();
     };
@@ -83,9 +88,12 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
 
         const params = new URLSearchParams(searchParams.toString());
         params.delete("category");
-        params.delete("brands");
+        params.delete("brand");
+        params.set("page", "1")
 
-        router.push(`/products?${params.toString()}`);
+        startTransition(() => {
+            router.push(`/products?${params.toString()}`);
+        });
     };
 
     return (
@@ -116,7 +124,7 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
                 {/* BRAND */}
                 <p className="font-medium text-lg md:text-md">Brands</p>
                 <div className="flex flex-col gap-4">
-                    {brands.map((item) => (
+                    {brand.map((item) => (
                         <label key={item.id} className="flex gap-2">
                             <input
                                 type="checkbox"
@@ -136,10 +144,10 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
             <div className="flex gap-2 text-sm">
                 <CustomButton
                     onClick={handleReset}
-                    disabled={isEmpty}
+                    disabled={isEmpty || isPending}
                     className={clsx(
                         "w-1/2 border border-black py-2 rounded-md",
-                        isEmpty && "opacity-50 cursor-not-allowed"
+                        (isEmpty || isPending) && "opacity-50 pointer-events-none"
                     )}
                 >
                     Reset
@@ -147,8 +155,15 @@ export default function FilterSidebar({ categories, brands, onApply }: Props) {
 
                 <CustomButton
                     onClick={handleApply}
-                    className="w-1/2 bg-black text-white py-2 rounded-md"
+                    disabled={isPending}
+                    className={clsx(
+                        "w-1/2 bg-black text-white py-2 rounded-md flex items-center justify-center gap-2",
+                        isPending && "opacity-70 pointer-events-none"
+                    )}
                 >
+                    {isPending && (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    )}
                     Apply
                 </CustomButton>
             </div>

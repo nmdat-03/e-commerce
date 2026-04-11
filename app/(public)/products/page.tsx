@@ -1,11 +1,13 @@
-import ProductList from "@/components/product/ProductList";
 import FilterSidebar from "@/components/product/FilterSidebar";
 import SortBar from "@/components/product/SortBar";
 import MobileFilter from "@/components/product/MobileFilter";
-import { getProducts } from "@/server/queries/product";
+import { getProductsCount, PAGE_SIZE } from "@/server/queries/product";
 import { getCategories } from "@/server/queries/category";
 import { getBrands } from "@/server/queries/brand";
 import CustomPagination from "@/components/common/CustomPagination";
+import { Suspense } from "react";
+import ProductListSkeleton from "@/components/product/ProductListSkeleton";
+import ProductListWrapper from "@/components/product/ProductListWrapper";
 
 export default async function ProductsPage({
     searchParams,
@@ -14,7 +16,7 @@ export default async function ProductsPage({
         q?: string;
         sort?: string;
         category?: string;
-        brands?: string;
+        brand?: string;
         page?: string;
     }>;
 }) {
@@ -24,23 +26,17 @@ export default async function ProductsPage({
 
     const page = Number(params.page) || 1;
 
-    const limit = 10;
-
-    const [productData, categories, brands] = await Promise.all([
-        getProducts({
+    const [total, categories, brand] = await Promise.all([
+        getProductsCount({
             searchQuery: params.q,
-            sort: params.sort as any,
             categorySlug: params.category,
-            brandSlug: params.brands,
-            page,
-            limit,
+            brandSlug: params.brand,
         }),
         getCategories(),
         getBrands(),
     ]);
 
-    const { products, total } = productData;
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / PAGE_SIZE);
 
     return (
         <div className="container py-6">
@@ -50,7 +46,7 @@ export default async function ProductsPage({
                 <div className="hidden lg:block w-1/4">
                     <FilterSidebar
                         categories={categories}
-                        brands={brands}
+                        brand={brand}
                     />
                 </div>
 
@@ -59,7 +55,7 @@ export default async function ProductsPage({
                     <div className="mb-4">
                         <MobileFilter
                             categories={categories}
-                            brands={brands}
+                            brand={brand}
                         />
                     </div>
                     {/* TOP BAR */}
@@ -75,7 +71,19 @@ export default async function ProductsPage({
                     </div>
 
                     {/* PRODUCT LIST */}
-                    <ProductList products={products} />
+                    <Suspense
+                        key={`${q}-${params.sort}-${params.category}-${params.brand}-${page}`}
+                        fallback={<ProductListSkeleton />}
+                    >
+                        <ProductListWrapper
+                            q={q}
+                            sort={params.sort}
+                            category={params.category}
+                            brand={params.brand}
+                            page={page}
+                            limit={PAGE_SIZE}
+                        />
+                    </Suspense>
 
                     {/* PAGINATION */}
                     <CustomPagination
