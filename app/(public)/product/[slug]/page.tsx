@@ -3,6 +3,7 @@ import ProductDetailClient from "./ProductDetailClient";
 
 export default async function ProductDetail({
     params,
+
 }: {
     params: Promise<{ slug: string }>;
 }) {

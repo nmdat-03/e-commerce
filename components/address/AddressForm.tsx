@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addressSchema, AddressInput } from "@/lib/validators/address";
 import { useEffect } from "react";
+import CustomButton from "../common/CustomButton";
 
 type Address = {
     id: string;
@@ -90,7 +91,7 @@ export default function AddressForm({ onSuccess, onCancel, initialData }: Props)
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-3 border p-3 rounded-lg"
+            className="space-y-3 border border-gray-400 p-3 rounded-lg"
         >
             <div>
                 <input
@@ -132,24 +133,24 @@ export default function AddressForm({ onSuccess, onCancel, initialData }: Props)
             </div>
 
             <div className="flex gap-2 justify-end">
-                <button
+                <CustomButton
                     type="button"
                     onClick={onCancel}
-                    className="text-black px-2 py-1 border rounded test-sm"
+                    className="text-black px-2 py-1 border border-black rounded text-md"
                 >
                     Cancel
-                </button>
-                <button
+                </CustomButton>
+                <CustomButton
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-black text-white px-2 py-1 rounded text-sm"
+                    className="bg-black text-white px-2 py-1 rounded text-md"
                 >
                     {isSubmitting
-                        ? "Saving..."
+                        ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         : initialData
                             ? "Update Address"
                             : "Save Address"}
-                </button>
+                </CustomButton>
             </div>
         </form>
     );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, easeInOut } from "framer-motion";
 import { formatOrderTime } from "@/lib/utils";
+import { formatPrice } from "@/lib/format";
 
 export default function OrderCard({ order }: { order: any }) {
     const [open, setOpen] = useState(false);
@@ -61,7 +62,7 @@ export default function OrderCard({ order }: { order: any }) {
                     </div>
 
                     <p className="font-semibold whitespace-nowrap">
-                        ${firstItem.price * firstItem.quantity}
+                        {formatPrice(firstItem.price * firstItem.quantity)}
                     </p>
                 </div>
             )}
@@ -143,7 +144,7 @@ export default function OrderCard({ order }: { order: any }) {
                 </p>
 
                 <p className="text-lg font-bold">
-                    ${order.total}
+                    {formatPrice(order.total)}
                 </p>
             </div>
         </div>

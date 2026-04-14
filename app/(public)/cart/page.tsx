@@ -8,10 +8,12 @@ import {
     decreaseCartItem,
 } from "@/server/actions/cart";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CartItem from "@/components/cart/CartItem";
 import CustomButton from "@/components/common/CustomButton";
+import CartSkeleton from "@/components/skeletons/CartSkeleton";
+import { formatPrice } from "@/lib/format";
 
 export default function CartPage() {
     const {
@@ -31,6 +33,13 @@ export default function CartPage() {
     const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
     const [showLoginModal, setShowLoginModal] = useState(false);
 
+    /* ---------------- SKELETON ---------------- */
+    const [hydrated, setHydrated] = useState(false);
+
+    useEffect(() => {
+        setHydrated(true);
+    }, []);
+
     /* ---------------- SELECT ---------------- */
     const allSelected = useMemo(
         () => items.length > 0 && items.every((item) => item.selected),
@@ -41,6 +50,10 @@ export default function CartPage() {
         () => items.filter((item) => item.selected),
         [items]
     );
+
+    if (!hydrated) {
+        return <CartSkeleton />;
+    }
 
     const setLoading = (id: string, value: boolean) => {
         setLoadingIds((prev) => ({
@@ -179,7 +192,7 @@ export default function CartPage() {
                 {/* TOTAL */}
                 <div className="flex justify-between items-center border-t pt-4">
                     <p className="text-lg font-semibold">Total:</p>
-                    <p className="text-xl font-bold">${totalPrice}</p>
+                    <p className="text-xl font-bold">{formatPrice(totalPrice)}</p>
                 </div>
 
                 {/* CHECKOUT */}

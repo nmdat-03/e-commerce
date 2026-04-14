@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CircleAlert } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatPrice } from "@/lib/format";
 
 type ProductCardProps = {
     product: {
@@ -63,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         {product.name}
                     </h2>
                     <p className="text-base font-semibold text-black">
-                        ${product.price.toLocaleString()}
+                        {formatPrice(product.price)}
                     </p>
                 </div>
             </Link>

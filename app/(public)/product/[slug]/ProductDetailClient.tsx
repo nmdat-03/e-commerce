@@ -4,8 +4,9 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import ProductGallery from "@/components/product/ProductGallery";
 import AddToCartButton from "@/components/cart/AddToCartButton";
-import { ChevronLeft, ExternalLink, Share } from "lucide-react";
+import { ChevronLeft, ExternalLink } from "lucide-react";
 import CustomButton from "@/components/common/CustomButton";
+import { formatPrice } from "@/lib/format";
 
 export default function ProductDetailClient({ product }: any) {
     const imgRef = useRef<HTMLDivElement | null>(null);
@@ -49,7 +50,7 @@ export default function ProductDetailClient({ product }: any) {
                             Products
                         </span>
 
-                        {" / "}
+                        {" > "}
 
                         {product.category?.name && (
                             <>
@@ -62,7 +63,7 @@ export default function ProductDetailClient({ product }: any) {
                                     {product.category.name}
                                 </span>
 
-                                {" / "}
+                                {" > "}
                             </>
                         )}
 
@@ -77,7 +78,7 @@ export default function ProductDetailClient({ product }: any) {
                                     {product.brand.name}
                                 </span>
 
-                                {" / "}
+                                {" > "}
                             </>
                         )}
 
@@ -99,7 +100,7 @@ export default function ProductDetailClient({ product }: any) {
 
                         {/* Price */}
                         <p className="text-xl md:text-2xl font-semibold text-black">
-                            ${product.price}
+                            {formatPrice(product.price)}
                         </p>
 
                         {/* Brand */}

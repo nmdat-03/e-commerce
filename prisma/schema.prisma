@@ -12,6 +12,11 @@ enum Role {
   ADMIN
 }
 
+enum PaymentMethod {
+  COD
+  VNPAY
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -105,6 +110,8 @@ model Category {
   name String @unique
   slug String @unique
 
+  image String?
+
   products Product[]
 }
 
@@ -112,6 +119,8 @@ model Brand {
   id   String @id @default(cuid())
   name String @unique
   slug String @unique
+
+  logo String?
 
   products Product[]
 }
@@ -153,6 +162,8 @@ model Order {
   fullName String
   phone    String
   address  String
+
+  paymentMethod PaymentMethod
 
   status OrderStatus @default(PENDING)
   total  Int

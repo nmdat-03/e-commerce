@@ -45,7 +45,7 @@ async function main() {
         name: `Product ${i}`,
         slug: `product-${i}`,
         description: `This is description of Product ${i}`,
-        price: (Math.floor(Math.random() * 20) + 1) * 5,
+        price: Math.floor(Math.random() * 490 + 10) * 1000,
         stock: 100,
         categoryId: category.id,
         brandId: brand.id,

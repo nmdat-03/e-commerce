@@ -1,6 +1,6 @@
 import CustomButton from "./CustomButton";
 
-export default function Header() {
+export default function Hero() {
     return (
         <section className="w-full py-16 md:min-h-[calc(100vh-64px)] flex items-center">
             <div className="container mx-auto grid md:grid-cols-2 gap-8 md:gap-16 items-center px-4">

@@ -7,7 +7,12 @@ type CreateOrderInput = {
   fullName: string;
   phone: string;
   address: string;
-  productIds: string[];
+  paymentMethod: "COD" | "VNPAY";
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }[];
 };
 
 /*----------------------------------------*/
@@ -41,7 +46,7 @@ export async function createOrder(data: CreateOrderInput) {
       where: {
         cartId: user.cart!.id,
         productId: {
-          in: data.productIds,
+          in: data.items.map((i) => i.productId),
         },
       },
     });
@@ -61,6 +66,8 @@ export async function createOrder(data: CreateOrderInput) {
         fullName: data.fullName,
         phone: data.phone,
         address: data.address,
+        paymentMethod: data.paymentMethod,
+        status: "PENDING",
         total,
         items: {
           create: cartItems.map((item) => ({
@@ -72,15 +79,6 @@ export async function createOrder(data: CreateOrderInput) {
       },
       include: {
         items: true,
-      },
-    });
-
-    await tx.cartItem.deleteMany({
-      where: {
-        cartId: user.cart!.id,
-        productId: {
-          in: data.productIds,
-        },
       },
     });
 
