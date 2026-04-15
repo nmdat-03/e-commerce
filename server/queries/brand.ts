@@ -6,6 +6,7 @@ export async function getBrands() {
       id: true,
       name: true,
       slug: true,
+      logo: true,
     },
     orderBy: { name: "asc" },
   });

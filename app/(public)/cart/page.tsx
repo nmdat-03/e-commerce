@@ -147,7 +147,7 @@ export default function CartPage() {
     if (items.length === 0) {
         return (
             <div className="container py-5">
-                <div className="bg-white rounded-2xl shadow-sm p-4 space-y-6">
+                <div className="bg-white rounded-2xl shadow-md p-4 space-y-6">
                     <h1 className="text-2xl font-bold">Your Cart</h1>
                     <p className="flex justify-center italic text-gray-400">
                         Your cart is empty

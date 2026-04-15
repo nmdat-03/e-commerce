@@ -1,5 +1,7 @@
 import Hero from "@/components/common/Hero";
+import BrandSection from "@/components/home/BrandSection";
 import ProductList from "@/components/product/ProductList";
+import { getBrands } from "@/server/queries/brand";
 import { getNewestProducts } from "@/server/queries/product";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +9,7 @@ import Link from "next/link";
 
 export default async function HomePage() {
     const products = await getNewestProducts(10)
+    const brands = await getBrands()
 
     return (
         <div>
@@ -16,6 +19,12 @@ export default async function HomePage() {
             {/* CATEGORIES */}
             <div className="container py-6">
                 <h2 className="text-xl font-semibold">Categories</h2>
+            </div>
+
+            {/* BRANDS */}
+            <div className="container py-6">
+                <h2 className="text-xl font-semibold mb-4">Brands</h2>
+                <BrandSection brands={brands} />
             </div>
 
             {/* BEST SELLING PRODUCTS */}

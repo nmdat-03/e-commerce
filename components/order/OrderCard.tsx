@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, easeInOut } from "framer-motion";
-import { formatOrderTime } from "@/lib/utils";
-import { formatPrice } from "@/lib/format";
+import { formatOrderTime, formatPrice } from "@/lib/format";
 
 export default function OrderCard({ order }: { order: any }) {
     const [open, setOpen] = useState(false);
@@ -15,28 +14,60 @@ export default function OrderCard({ order }: { order: any }) {
     return (
         <div className="bg-white border rounded-2xl shadow-sm p-5 space-y-4">
             {/* Header */}
-            <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-500 space-y-2">
-                    <p>
-                        <span className="font-medium text-black">Order ID:</span>{" "}
-                        {order.id}
-                    </p>
-                    <p>{formatOrderTime(order.createdAt)}</p>
+            <div className="flex justify-end">
+                {/* ORDER STATUS */}
+                <div className="flex gap-2 items-center">
+                    <p className="text-sm">Order status:</p>
+                    <span
+                        className={`px-3 py-1 text-xs rounded-full font-medium 
+                        ${order.orderStatus === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : order.orderStatus === "CONFIRMED"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : order.orderStatus === "SHIPPING"
+                                        ? "bg-purple-100 text-purple-700"
+                                        : order.orderStatus === "COMPLETED"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700"
+                            }`}
+                    >
+                        {order.orderStatus}
+                    </span>
                 </div>
+            </div>
 
-                <span
-                    className={`px-3 py-1 text-xs rounded-full font-medium 
-                    ${order.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : order.status === "SHIPPING"
-                                ? "bg-blue-100 text-blue-700"
-                                : order.status === "COMPLETED"
+            <div className="text-sm text-gray-500 space-y-2">
+                <p>
+                    <span className="font-medium text-black">Order ID:</span>{" "}
+                    {order.id}
+                </p>
+                <p>{formatOrderTime(order.createdAt)}</p>
+                {/* PAYMENT STATUS */}
+                <div className="flex gap-2 items-center">
+                    {/* METHOD */}
+                    <span className="text-sm font-medium text-black">
+                        {order.paymentMethod === "COD"
+                            ? "Cash on Delivery (COD)"
+                            : order.paymentMethod === "VNPAY"
+                                ? "Online Payment (VNPay)"
+                                : order.paymentMethod}
+                    </span>
+
+                    {/* STATUS */}
+                    <span
+                        className={`px-3 py-1 text-xs rounded-full font-medium 
+                            ${order.paymentStatus === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : order.paymentStatus === "PAID"
                                     ? "bg-green-100 text-green-700"
-                                    : "bg-gray-100 text-gray-600"
-                        }`}
-                >
-                    {order.status}
-                </span>
+                                    : order.paymentStatus === "FAILED"
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-gray-100 text-gray-600"
+                            }`}
+                    >
+                        {order.paymentStatus}
+                    </span>
+                </div>
             </div>
 
             {/* FIRST ITEM */}

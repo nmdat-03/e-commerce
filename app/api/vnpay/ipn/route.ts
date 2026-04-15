@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import qs from "qs";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,6 @@ export async function GET(req: NextRequest) {
     urlParams.forEach((value, key) => {
       params[key] = value.replace(/ /g, "+");
     });
-
-    console.log("IPN RAW PARAMS:", params);
 
     const secureHash = params["vnp_SecureHash"];
 
@@ -40,11 +39,8 @@ export async function GET(req: NextRequest) {
     });
 
     const hmac = crypto.createHmac("sha512", process.env.VNP_HASH_SECRET!);
-    const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
-    console.log("IPN SIGN DATA:", signData);
-    console.log("VNP HASH:", secureHash);
-    console.log("LOCAL HASH:", signed);
+    const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
     if (secureHash !== signed) {
       return NextResponse.json({
@@ -53,10 +49,66 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      RspCode: "00",
-      Message: "OK",
+    const orderId = params["vnp_TxnRef"];
+    const responseCode = params["vnp_ResponseCode"];
+    const amount = Number(params["vnp_Amount"]) / 100;
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
     });
+
+    if (!order) {
+      return NextResponse.json({
+        RspCode: "01",
+        Message: "Order not found",
+      });
+    }
+
+    if (order.paymentStatus === "PAID") {
+      return NextResponse.json({
+        RspCode: "02",
+        Message: "Order already confirmed",
+      });
+    }
+
+    if (amount !== order.total) {
+      return NextResponse.json({
+        RspCode: "04",
+        Message: "Invalid amount",
+      });
+    }
+
+    if (responseCode === "00") {
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: "PAID",
+          orderStatus: "CONFIRMED",
+          paidAt: new Date(),
+        },
+      });
+
+      console.log("IPN PAYMENT SUCCESS:", orderId);
+
+      return NextResponse.json({
+        RspCode: "00",
+        Message: "Confirm Success",
+      });
+    } else {
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: "FAILED",
+        },
+      });
+
+      console.log("IPN PAYMENT FAILED:", orderId);
+
+      return NextResponse.json({
+        RspCode: "00",
+        Message: "Confirm Success",
+      });
+    }
   } catch (error) {
     console.error("IPN ERROR:", error);
 

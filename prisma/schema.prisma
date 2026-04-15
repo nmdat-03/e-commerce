@@ -19,10 +19,17 @@ enum PaymentMethod {
 
 enum OrderStatus {
   PENDING
-  PAID
+  CONFIRMED
   SHIPPING
   COMPLETED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }
 
 model User {
@@ -164,9 +171,14 @@ model Order {
   address  String
 
   paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
 
-  status OrderStatus @default(PENDING)
-  total  Int
+  orderStatus OrderStatus @default(PENDING)
+
+  total Int
+
+  paidAt      DateTime?
+  deliveredAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

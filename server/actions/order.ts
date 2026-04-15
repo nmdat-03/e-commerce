@@ -55,6 +55,10 @@ export async function createOrder(data: CreateOrderInput) {
       throw new Error("Cart is empty");
     }
 
+    if (cartItems.length !== data.items.length) {
+      throw new Error("Invalid cart items");
+    }
+
     const total = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
@@ -67,7 +71,8 @@ export async function createOrder(data: CreateOrderInput) {
         phone: data.phone,
         address: data.address,
         paymentMethod: data.paymentMethod,
-        status: "PENDING",
+        orderStatus: "PENDING",
+        paymentStatus: "PENDING",
         total,
         items: {
           create: cartItems.map((item) => ({
@@ -81,6 +86,17 @@ export async function createOrder(data: CreateOrderInput) {
         items: true,
       },
     });
+
+    if (data.paymentMethod === "COD") {
+      await tx.cartItem.deleteMany({
+        where: {
+          cartId: user.cart!.id,
+          productId: {
+            in: cartItems.map((item) => item.productId),
+          },
+        },
+      });
+    }
 
     return order;
   });

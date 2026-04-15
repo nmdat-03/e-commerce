@@ -17,6 +17,22 @@ export async function POST(req: NextRequest) {
       throw new Error("Order not found");
     }
 
+    if (order.paymentMethod !== "VNPAY") {
+      throw new Error("Invalid payment method");
+    }
+
+    if (order.paymentStatus !== "PENDING") {
+      throw new Error("Order is not valid for payment");
+    }
+
+    if (order.orderStatus !== "PENDING") {
+      throw new Error("Order cannot be paid");
+    }
+
+    if (order.total <= 0) {
+      throw new Error("Invalid order amount");
+    }
+
     const tmnCode = process.env.VNP_TMN_CODE!;
     const secretKey = process.env.VNP_HASH_SECRET!;
     const vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";

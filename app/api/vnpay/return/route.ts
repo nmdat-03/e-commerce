@@ -13,13 +13,11 @@ export async function GET(req: NextRequest) {
       params[key] = value.replace(/ /g, "+");
     });
 
-    console.log("RETURN RAW PARAMS:", params);
-
     const secureHash = params["vnp_SecureHash"];
 
     if (!secureHash) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?code=missing_hash`,
       );
     }
 
@@ -38,15 +36,12 @@ export async function GET(req: NextRequest) {
     });
 
     const hmac = crypto.createHmac("sha512", process.env.VNP_HASH_SECRET!);
-    const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
-    console.log("SIGN DATA:", signData);
-    console.log("VNP HASH:", secureHash);
-    console.log("LOCAL HASH:", signed);
+    const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
     if (secureHash !== signed) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?code=invalid_checksum`,
       );
     }
 
@@ -61,56 +56,74 @@ export async function GET(req: NextRequest) {
 
     if (!order) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?orderId=${orderId}&code=order_not_found`,
       );
     }
 
-    if (order.status === "PENDING") {
-      if (amount === order.total) {
-        if (responseCode === "00") {
-          await prisma.$transaction([
-            prisma.order.update({
-              where: { id: orderId },
-              data: { status: "PAID" },
-            }),
-            prisma.cartItem.deleteMany({
-              where: {
-                cart: { userId: order.userId },
-                productId: {
-                  in: order.items.map((i) => i.productId),
-                },
-              },
-            }),
-          ]);
+    let isSuccess = false;
 
-          console.log("RETURN PAYMENT SUCCESS:", orderId);
-        } else {
-          await prisma.order.update({
-            where: { id: orderId },
-            data: { status: "CANCELLED" },
-          });
+    if (order.paymentStatus !== "PAID") {
+      if (amount !== order.total) {
+        await prisma.order.update({
+          where: { id: orderId },
+          data: { paymentStatus: "FAILED" },
+        });
 
-          console.log("RETURN PAYMENT FAILED:", orderId);
-        }
-      } else {
-        console.log("INVALID AMOUNT:", orderId);
+        return NextResponse.redirect(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?orderId=${orderId}&code=invalid_amount`,
+        );
       }
+
+      if (responseCode === "00") {
+        isSuccess = true;
+
+        await prisma.$transaction([
+          prisma.order.update({
+            where: { id: orderId },
+            data: {
+              paymentStatus: "PAID",
+              paidAt: new Date(),
+            },
+          }),
+          prisma.cartItem.deleteMany({
+            where: {
+              cart: { userId: order.userId },
+              productId: {
+                in: order.items.map((i) => i.productId),
+              },
+            },
+          }),
+        ]);
+
+        console.log("RETURN PAYMENT SUCCESS:", orderId);
+      } else {
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentStatus: "FAILED",
+          },
+        });
+
+        console.log("RETURN PAYMENT FAILED:", orderId);
+      }
+    } else {
+      isSuccess = true;
     }
 
-    if (responseCode === "00") {
+    if (isSuccess) {
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?orderId=${orderId}`,
       );
     }
 
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?orderId=${orderId}&code=${responseCode}`,
     );
   } catch (error) {
     console.error("RETURN ERROR:", error);
 
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/order/failed?code=server_error`,
     );
   }
 }

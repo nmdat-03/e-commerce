@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function PaymentMethod({
     value,
     onChange,
@@ -16,8 +18,17 @@ export default function PaymentMethod({
                     type="radio"
                     checked={value === "COD"}
                     onChange={() => onChange("COD")}
+                    className="accent-black"
                 />
-                <span>Cash on Delivery (COD)</span>
+                <div className="flex items-center gap-2">
+                    <Image
+                        src="/icons/cod.png"
+                        alt="VNPay"
+                        width={24}
+                        height={24}
+                    />
+                    <span>Cash on Delivery (COD)</span>
+                </div>
             </label>
 
             <label className="flex items-center gap-3 border p-3 rounded-lg cursor-pointer">
@@ -25,8 +36,17 @@ export default function PaymentMethod({
                     type="radio"
                     checked={value === "VNPAY"}
                     onChange={() => onChange("VNPAY")}
+                    className="accent-black"
                 />
-                <span>VNPay (Online Payment)</span>
+                <div className="flex items-center gap-2">
+                    <Image
+                        src="/icons/vnpay.svg"
+                        alt="VNPay"
+                        width={68}
+                        height={68}
+                    />
+                    <span>(Online Payment)</span>
+                </div>
             </label>
         </div>
     );

@@ -28,6 +28,7 @@ async function main() {
         create: {
           name: `Brand ${i + 1}`,
           slug,
+          logo: `/images/brand.png`,
         },
       }),
     ),
