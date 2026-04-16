@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import AddressSection from "@/components/checkout/AddressSection";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import PaymentMethod from "@/components/checkout/PaymentMethod";
+import CustomButton from "@/components/common/CustomButton";
+import { ChevronLeft } from "lucide-react";
 
 type Address = {
     id: string;
@@ -83,31 +85,43 @@ export default function CheckoutClient({ initialAddresses }: Props) {
 
     if (selectedItems.length === 0) {
         return (
-            <div className="container py-10 text-center">
+            <div className="container py-6 text-center italic">
                 No items selected
             </div>
         );
     }
 
     return (
-        <div className="container py-10 grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
-            <div className="space-y-5">
-                <AddressSection
-                    initialAddresses={initialAddresses}
-                    onSelect={setSelectedAddress}
-                />
+        <div className="container py-3 space-y-3">
+            {/* BACK BUTTON */}
+            <CustomButton
+                onClick={() => router.back()}
+                className="text-sm px-4 py-2 rounded-full shadow-md bg-white flex items-center"
+            >
+                <ChevronLeft size={14} />
+                Back
+            </CustomButton>
 
-                <PaymentMethod
-                    value={paymentMethod}
-                    onChange={setPaymentMethod}
+            {/* CHECKOUT SECTION */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                <div className="space-y-5">
+                    <AddressSection
+                        initialAddresses={initialAddresses}
+                        onSelect={setSelectedAddress}
+                    />
+
+                    <PaymentMethod
+                        value={paymentMethod}
+                        onChange={setPaymentMethod}
+                    />
+                </div>
+
+                <OrderSummary
+                    items={selectedItems}
+                    loading={loading}
+                    onPlaceOrder={handlePlaceOrder}
                 />
             </div>
-
-            <OrderSummary
-                items={selectedItems}
-                loading={loading}
-                onPlaceOrder={handlePlaceOrder}
-            />
         </div>
     );
 }

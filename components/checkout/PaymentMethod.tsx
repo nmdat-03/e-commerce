@@ -42,7 +42,7 @@ export default function PaymentMethod({
                     <Image
                         src="/icons/vnpay.svg"
                         alt="VNPay"
-                        width={68}
+                        width={80}
                         height={68}
                     />
                     <span>(Online Payment)</span>

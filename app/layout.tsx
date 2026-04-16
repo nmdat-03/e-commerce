@@ -2,19 +2,20 @@ import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import Navbar from "@/components/common/Navbar";
-import Footer from "@/components/common/Footer";
 import CartSync from "@/components/cart/CartSync";
 import FlyProvider from "@/components/providers/FlyProvider";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  display: 'swap',
-  variable: '--font-poppins',
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -24,22 +25,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en" className={cn("font-sans", geist.variable)}>
-        <body
-          className={`${poppins.variable} antialiased min-h-screen flex flex-col`}
-        >
+        <body className={`${poppins.variable} antialiased min-h-screen flex flex-col`}>
           <FlyProvider>
-            <Navbar />
             <CartSync />
             <main className="flex-1">
               {children}
             </main>
-            <Footer />
           </FlyProvider>
         </body>
       </html>
