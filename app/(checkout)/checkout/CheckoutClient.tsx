@@ -92,7 +92,7 @@ export default function CheckoutClient({ initialAddresses }: Props) {
     }
 
     return (
-        <div className="container py-3 space-y-3">
+        <div className="container space-y-3">
             {/* BACK BUTTON */}
             <CustomButton
                 onClick={() => router.back()}

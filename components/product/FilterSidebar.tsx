@@ -11,33 +11,24 @@ type Props = {
         name: string;
         slug: string;
     }[];
-    brand: {
-        id: string;
-        name: string;
-        slug: string;
-    }[];
     onApply?: () => void;
 };
 
-export default function FilterSidebar({ categories, brand, onApply }: Props) {
+export default function FilterSidebar({ categories, onApply }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 
-    const isEmpty = selectedCategories.length === 0 && selectedBrands.length === 0;
+    const isEmpty = selectedCategories.length === 0;
 
     /*------------------------------*/
     /*      SYNC FROM URL           */
     /*------------------------------*/
     useEffect(() => {
         const categoryFromUrl = searchParams.get("category")?.split(",") || [];
-        const brandFromUrl = searchParams.get("brand")?.split(",") || [];
-
         setSelectedCategories(categoryFromUrl);
-        setSelectedBrands(brandFromUrl);
     }, [searchParams]);
 
     const toggleValue = (
@@ -64,12 +55,6 @@ export default function FilterSidebar({ categories, brand, onApply }: Props) {
             params.delete("category");
         }
 
-        if (selectedBrands.length > 0) {
-            params.set("brand", selectedBrands.join(","));
-        } else {
-            params.delete("brand");
-        }
-
         params.set("page", "1")
 
         startTransition(() => {
@@ -84,11 +69,9 @@ export default function FilterSidebar({ categories, brand, onApply }: Props) {
     /*------------------------------*/
     const handleReset = () => {
         setSelectedCategories([]);
-        setSelectedBrands([]);
 
         const params = new URLSearchParams(searchParams.toString());
         params.delete("category");
-        params.delete("brand");
         params.set("page", "1")
 
         startTransition(() => {
@@ -119,25 +102,6 @@ export default function FilterSidebar({ categories, brand, onApply }: Props) {
                     ))}
                 </div>
 
-                <div className="border-t border-gray-300 my-3" />
-
-                {/* BRAND */}
-                <p className="font-medium text-lg md:text-md">Brands</p>
-                <div className="flex flex-col gap-4">
-                    {brand.map((item) => (
-                        <label key={item.id} className="flex gap-2">
-                            <input
-                                type="checkbox"
-                                className="w-5 h-5 accent-black"
-                                checked={selectedBrands.includes(item.slug)}
-                                onChange={() =>
-                                    toggleValue(item.slug, selectedBrands, setSelectedBrands)
-                                }
-                            />
-                            {item.name}
-                        </label>
-                    ))}
-                </div>
             </div>
 
             {/* BUTTON */}

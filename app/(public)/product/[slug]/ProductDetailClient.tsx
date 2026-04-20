@@ -67,21 +67,6 @@ export default function ProductDetailClient({ product }: any) {
                             </>
                         )}
 
-                        {product.brand?.name && (
-                            <>
-                                <span
-                                    className="hover:text-black cursor-pointer"
-                                    onClick={() =>
-                                        goToProducts({ brand: product.brand.slug })
-                                    }
-                                >
-                                    {product.brand.name}
-                                </span>
-
-                                {" > "}
-                            </>
-                        )}
-
                         <span className="text-gray-800 font-medium">
                             {product.name}
                         </span>
@@ -103,35 +88,8 @@ export default function ProductDetailClient({ product }: any) {
                             {formatPrice(product.price)}
                         </p>
 
-                        {/* Brand */}
-                        <div className="text-md text-gray-500">
-                            {product.brand?.name && (
-                                <p>Brand: {product.brand.name}</p>
-                            )}
-                        </div>
-
-                        {/* Stock */}
-                        <div className="inline-flex">
-                            {product.stock === 0 && (
-                                <p className="text-red-500 bg-red-100 px-4 py-1 rounded-md">Out of stock</p>
-                            )}
-
-                            {product.stock > 0 && product.stock <= 5 && (
-                                <p className="text-orange-500 bg-orange-100 px-4 py-1 rounded-md">
-                                    Only {product.stock} left
-                                </p>
-                            )}
-
-                            {product.stock > 5 && (
-                                <p className="text-green-600 bg-green-100 px-4 py-1 rounded-md">
-                                    In stock
-                                </p>
-                            )}
-                        </div>
-
                         {/* Add to cart */}
                         <AddToCartButton
-                            disabled={product.stock === 0}
                             imgRef={imgRef}
                             product={{
                                 id: product.id,

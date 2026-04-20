@@ -9,7 +9,6 @@ type GetProductsParams = {
   searchQuery?: string;
   sort?: "price_asc" | "price_desc" | "newest";
   categorySlug?: string;
-  brandSlug?: string;
   page?: number;
   limit?: number;
 };
@@ -20,29 +19,23 @@ type GetProductsParams = {
 function buildWhere({
   searchQuery,
   categorySlug,
-  brandSlug,
 }: GetProductsParams) {
   const categorySlugs = categorySlug?.split(",").filter(Boolean);
-  const brandSlugs = brandSlug?.split(",").filter(Boolean);
 
   return {
+    isActive: true,
+
     ...(searchQuery && {
       name: {
         contains: searchQuery,
         mode: "insensitive" as const,
       },
     }),
+
     ...(categorySlugs?.length && {
       category: {
         slug: {
           in: categorySlugs,
-        },
-      },
-    }),
-    ...(brandSlugs?.length && {
-      brand: {
-        slug: {
-          in: brandSlugs,
         },
       },
     }),
@@ -72,18 +65,15 @@ export async function getProducts({
   const take = limit;
   const skip = (page - 1) * limit;
 
-  const products = await prisma.product.findMany({
+  return prisma.product.findMany({
     where,
     include: {
       images: true,
-      brand: true,
     },
     orderBy,
     take,
     skip,
   });
-
-  return products;
 }
 
 /*----------------------------------------*/
@@ -92,11 +82,9 @@ export async function getProducts({
 export async function getProductsCount(params: GetProductsParams) {
   const where = buildWhere(params);
 
-  const total = await prisma.product.count({
+  return prisma.product.count({
     where,
   });
-
-  return total;
 }
 
 /*----------------------------------------*/
@@ -104,11 +92,13 @@ export async function getProductsCount(params: GetProductsParams) {
 /*----------------------------------------*/
 export async function getNewestProducts(limit = 10) {
   return prisma.product.findMany({
+    where: {
+      isActive: true,
+    },
     take: limit,
     orderBy: { createdAt: "desc" },
     include: {
       images: true,
-      brand: true,
     },
   });
 }
@@ -117,36 +107,30 @@ export async function getNewestProducts(limit = 10) {
 /*           GET PRODUCT BY ID            */
 /*----------------------------------------*/
 export async function getProductById(id: string) {
-  try {
-    return await prisma.product.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        images: true,
-        brand: true,
-      },
-    });
-  } catch (error) {
-    console.error("[GET_PRODUCT_ERROR]", error);
-    throw new Error("Cannot fetch product");
-  }
+  return prisma.product.findFirst({
+    where: {
+      id,
+      isActive: true,
+    },
+    include: {
+      category: true,
+      images: true,
+    },
+  });
 }
 
 /*----------------------------------------*/
 /*         GET PRODUCT BY SLUG            */
 /*----------------------------------------*/
 export async function getProductBySlug(slug: string) {
-  try {
-    return await prisma.product.findUnique({
-      where: { slug },
-      include: {
-        category: true,
-        images: true,
-        brand: true,
-      },
-    });
-  } catch (error) {
-    console.error("[GET_PRODUCT_BY_SLUG_ERROR]", error);
-    throw new Error("Cannot fetch product");
-  }
+  return prisma.product.findFirst({
+    where: {
+      slug,
+      isActive: true,
+    },
+    include: {
+      category: true,
+      images: true,
+    },
+  });
 }

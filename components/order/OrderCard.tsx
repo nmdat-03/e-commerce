@@ -1,15 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, easeInOut } from "framer-motion";
 import { formatOrderTime, formatPrice } from "@/lib/format";
 
 export default function OrderCard({ order }: { order: any }) {
     const [open, setOpen] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const firstItem = order.items[0];
     const remainingItems = order.items.slice(1);
+
+    useEffect(() => {
+        if (showConfirm) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showConfirm]);
 
     return (
         <div className="bg-white border rounded-2xl shadow-sm p-5 space-y-4">
@@ -169,15 +183,65 @@ export default function OrderCard({ order }: { order: any }) {
             </AnimatePresence>
 
             {/* Footer */}
-            <div className="flex gap-2 justify-end items-center pt-2">
-                <p className="text-md text-gray-500">
-                    Total payment ({order.items.length} items):
-                </p>
+            <div className="flex justify-between items-center">
+                {/* CANCEL BUTTON */}
+                {(order.orderStatus === "PENDING" ||
+                    order.orderStatus === "CONFIRMED") && (
+                        <button
+                            onClick={() => setShowConfirm(true)}
+                            className="px-3 py-1 text-sm bg-red-100 text-red-500 border border-red-500 rounded-md"
+                        >
+                            Cancel Order
+                        </button>
+                    )}
 
-                <p className="text-lg font-bold">
-                    {formatPrice(order.total)}
-                </p>
+                <div className="flex gap-3 items-center">
+                    <p className="text-md text-gray-500">
+                        Total payment ({order.items.length} items):
+                    </p>
+
+                    <p className="text-lg font-bold">
+                        {formatPrice(order.total)}
+                    </p>
+                </div>
             </div>
+            {showConfirm && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 space-y-4 w-96">
+                        <h2 className="text-lg font-semibold">
+                            Cancel order?
+                        </h2>
+
+                        <p className="text-sm text-gray-500">
+                            Are you sure you want to cancel this order?
+                        </p>
+
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="px-3 py-1 text-sm border rounded"
+                                disabled={loading}
+                            >
+                                No
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    setLoading(true);
+                                    await fetch(`/api/orders/${order.id}/cancel`, {
+                                        method: "PATCH",
+                                    });
+                                    window.location.reload();
+                                }}
+                                className="px-3 py-1 text-sm bg-red-500 text-white rounded"
+                                disabled={loading}
+                            >
+                                {loading ? "Cancelling..." : "Yes, cancel"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

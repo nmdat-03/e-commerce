@@ -24,12 +24,6 @@ export default function ProductDetailSkeleton() {
                         {/* Price */}
                         <div className="h-6 w-1/3 bg-gray-200 rounded" />
 
-                        {/* Brand */}
-                        <div className="h-4 w-1/2 bg-gray-200 rounded" />
-
-                        {/* Stock */}
-                        <div className="h-6 w-28 bg-gray-200 rounded-md" />
-
                         {/* Add to cart */}
                         <div className="h-10 w-40 bg-gray-200 rounded-xl" />
                     </div>

@@ -15,19 +15,11 @@ type CreateOrderInput = {
   }[];
 };
 
-/*----------------------------------------*/
-/*              CREATE ORDER              */
-/*----------------------------------------*/
 export async function createOrder(data: CreateOrderInput) {
   const user = await getCurrentUser();
 
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!user.cart) {
-    throw new Error("Cart not found");
-  }
+  if (!user) throw new Error("Unauthorized");
+  if (!user.cart) throw new Error("Cart not found");
 
   const lastOrder = await prisma.order.findFirst({
     where: { userId: user.id },
@@ -38,7 +30,7 @@ export async function createOrder(data: CreateOrderInput) {
     lastOrder &&
     Date.now() - new Date(lastOrder.createdAt).getTime() < 10000
   ) {
-    throw new Error("Please try again later!!!");
+    throw new Error("Please try again later");
   }
 
   const order = await prisma.$transaction(async (tx) => {
@@ -51,12 +43,28 @@ export async function createOrder(data: CreateOrderInput) {
       },
     });
 
-    if (!cartItems.length) {
-      throw new Error("Cart is empty");
-    }
+    if (!cartItems.length) throw new Error("Cart is empty");
 
     if (cartItems.length !== data.items.length) {
       throw new Error("Invalid cart items");
+    }
+
+    const products = await tx.product.findMany({
+      where: {
+        id: {
+          in: cartItems.map((item) => item.productId),
+        },
+      },
+      select: {
+        id: true,
+        isActive: true,
+      },
+    });
+
+    const inactive = products.find((p) => !p.isActive);
+
+    if (inactive) {
+      throw new Error("Some items are unavailable");
     }
 
     const total = cartItems.reduce(
@@ -87,16 +95,14 @@ export async function createOrder(data: CreateOrderInput) {
       },
     });
 
-    if (data.paymentMethod === "COD") {
-      await tx.cartItem.deleteMany({
-        where: {
-          cartId: user.cart!.id,
-          productId: {
-            in: cartItems.map((item) => item.productId),
-          },
+    await tx.cartItem.deleteMany({
+      where: {
+        cartId: user.cart!.id,
+        productId: {
+          in: cartItems.map((item) => item.productId),
         },
-      });
-    }
+      },
+    });
 
     return order;
   });

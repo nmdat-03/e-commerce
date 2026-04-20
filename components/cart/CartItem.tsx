@@ -13,7 +13,6 @@ type CartItemType = {
     image?: string;
     quantity: number;
     selected: boolean;
-    stock?: number;
 };
 
 type Props = {
@@ -33,7 +32,7 @@ function CartItem({
     onToggle,
     loading = false,
 }: Props) {
-    const { id, name, price, image, quantity, selected, stock } = item;
+    const { id, name, price, image, quantity, selected } = item;
 
     return (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between border p-4 rounded-xl gap-4">
@@ -62,9 +61,7 @@ function CartItem({
 
                     <p className="text-gray-600">{formatPrice(price)}</p>
 
-                    <p className="text-sm text-gray-400">
-                        x{quantity}
-                    </p>
+                    <p className="text-sm text-gray-400">x{quantity}</p>
                 </div>
             </div>
 
@@ -101,14 +98,10 @@ function CartItem({
 
                     <button
                         onClick={() => onIncrease(id)}
-                        disabled={
-                            loading ||
-                            (stock !== undefined && quantity >= stock)
-                        }
+                        disabled={loading}
                         className={clsx(
                             "w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md",
-                            loading ||
-                                (stock !== undefined && quantity >= stock)
+                            loading
                                 ? "opacity-30 cursor-not-allowed"
                                 : "hover:bg-gray-200"
                         )}

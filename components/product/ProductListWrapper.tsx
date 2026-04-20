@@ -7,7 +7,6 @@ type Props = {
     q?: string;
     sort?: SortType;
     category?: string;
-    brand?: string;
     page: number;
     limit: number;
 };
@@ -16,7 +15,6 @@ export default async function ProductListWrapper({
     q,
     sort,
     category,
-    brand,
     page,
     limit,
 }: Props) {
@@ -24,7 +22,6 @@ export default async function ProductListWrapper({
         searchQuery: q,
         sort: sort,
         categorySlug: category,
-        brandSlug: brand,
         page,
         limit,
     });

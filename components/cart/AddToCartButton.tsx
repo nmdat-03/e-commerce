@@ -14,7 +14,6 @@ type Props = {
         name: string;
         price: number;
         image?: string;
-        stock?: number;
     };
     imgRef?: React.RefObject<HTMLElement | null>;
     disabled?: boolean;
@@ -40,10 +39,7 @@ export default function AddToCartButton({
                 if (res?.error) return;
 
                 if (res?.item) {
-                    addToCart({
-                        ...res.item,
-                        stock: res.item.stock,
-                    });
+                    addToCart(res.item);
                 }
 
                 const imgRect = imgRef?.current?.getBoundingClientRect();
@@ -77,6 +73,7 @@ export default function AddToCartButton({
             }
         });
     };
+
     return (
         <button
             onClick={handleAddToCart}

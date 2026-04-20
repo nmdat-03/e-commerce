@@ -11,7 +11,7 @@ export default function Footer() {
     return (
         <footer className="bg-gray-100 mt-16">
             <div className="container py-10 flex flex-col lg:flex-row lg:justify-between gap-8 text-sm">
-                {/* Brand */}
+                {/* Logo */}
                 <div>
                     <h2 className="text-lg font-bold mb-3">MyStore</h2>
                     <p className="text-gray-600">
@@ -43,8 +43,8 @@ export default function Footer() {
                     <div>
                         <h3 className="font-semibold mb-3">Follow Us</h3>
                         <ul className="space-y-2 text-gray-600">
-                            <li className="flex items-center gap-1"><Image src={facebookIcon} alt="facebook-icons" width={26} height={26}/>Facebook</li>
-                            <li className="flex items-center gap-1"><Image src={instagramIcon} alt="instagram-icons" width={26} height={26}/>Instagram</li>
+                            <li className="flex items-center gap-1"><Image src={facebookIcon} alt="facebook-icons" width={26} height={26} />Facebook</li>
+                            <li className="flex items-center gap-1"><Image src={instagramIcon} alt="instagram-icons" width={26} height={26} />Instagram</li>
                         </ul>
                     </div>
                 </div>

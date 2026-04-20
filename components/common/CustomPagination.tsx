@@ -3,14 +3,15 @@
 import {
     Pagination,
     PaginationContent,
+    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-    PaginationEllipsis,
 } from "@/components/ui/pagination";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 
 type Props = {
     currentPage: number;
@@ -22,32 +23,35 @@ export default function CustomPagination({
     totalPages,
 }: Props) {
     const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [isPending, startTransition] = useTransition();
+
+    if (totalPages <= 1) return null;
 
     const createPageLink = (page: number) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", String(page));
-        return `?${params.toString()}`;
+        return `${pathname}?${params.toString()}`;
     };
 
-    const handleNavigate = (page: number) => {
-        router.push(createPageLink(page));
+    const navigate = (page: number) => {
+        if (page < 1 || page > totalPages || page === currentPage) return;
+
+        startTransition(() => {
+            router.push(createPageLink(page), { scroll: false });
+        });
 
         window.scrollTo({
             top: 0,
             behavior: "smooth",
         });
-
-
     };
-
-    if (totalPages <= 1) return null;
 
     const getPages = () => {
         const pages: (number | "...")[] = [];
 
-
-        if (totalPages <= 5) {
+        if (totalPages <= 7) {
             return Array.from({ length: totalPages }, (_, i) => i + 1);
         }
 
@@ -75,19 +79,23 @@ export default function CustomPagination({
 
     const pages = getPages();
 
+    const disabledClass =
+        "pointer-events-none opacity-50 cursor-not-allowed";
+
     return (
         <Pagination className="mt-6">
-            <PaginationContent>
-
+            <PaginationContent className="flex-wrap gap-1">
                 {/* PREVIOUS */}
                 <PaginationItem>
                     <PaginationPrevious
-                        onClick={() =>
-                            currentPage > 1 && handleNavigate(currentPage - 1)
-                        }
+                        href={createPageLink(currentPage - 1)}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate(currentPage - 1);
+                        }}
                         className={
-                            currentPage === 1
-                                ? "pointer-events-none opacity-50"
+                            currentPage === 1 || isPending
+                                ? disabledClass
                                 : "cursor-pointer"
                         }
                     />
@@ -95,19 +103,30 @@ export default function CustomPagination({
 
                 {/* PAGE NUMBERS */}
                 {pages.map((page, index) => (
-                    <PaginationItem key={index}>
+                    <PaginationItem key={`${page}-${index}`}>
                         {page === "..." ? (
                             <PaginationEllipsis />
                         ) : (
                             <PaginationLink
+                                href={createPageLink(page)}
                                 isActive={page === currentPage}
-                                onClick={() => handleNavigate(page)}
-                                className={`cursor-pointer 
-                                ${page === currentPage
-                                        ? "bg-black text-white hover:bg-black hover:text-white"
-                                        : "bg-white hover:bg-white/70"
-                                    }`
-                                }
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    navigate(page);
+                                }}
+                                className={`
+                                    min-w-9 cursor-pointer
+                                    ${
+                                        page === currentPage
+                                            ? "bg-black text-white hover:bg-black hover:text-white"
+                                            : ""
+                                    }
+                                    ${
+                                        isPending
+                                            ? "pointer-events-none opacity-70"
+                                            : ""
+                                    }
+                                `}
                             >
                                 {page}
                             </PaginationLink>
@@ -118,21 +137,19 @@ export default function CustomPagination({
                 {/* NEXT */}
                 <PaginationItem>
                     <PaginationNext
-                        onClick={() =>
-                            currentPage < totalPages &&
-                            handleNavigate(currentPage + 1)
-                        }
+                        href={createPageLink(currentPage + 1)}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate(currentPage + 1);
+                        }}
                         className={
-                            currentPage === totalPages
-                                ? "pointer-events-none opacity-50"
+                            currentPage === totalPages || isPending
+                                ? disabledClass
                                 : "cursor-pointer"
                         }
                     />
                 </PaginationItem>
-
             </PaginationContent>
         </Pagination>
-
-
     );
 }

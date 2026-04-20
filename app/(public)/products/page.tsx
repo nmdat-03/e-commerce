@@ -4,13 +4,12 @@ import ProductsContent from "./ProductsContent";
 export default function ProductsPage({
     searchParams,
 }: {
-    searchParams: {
+    searchParams: Promise<{
         q?: string;
         sort?: string;
         category?: string;
-        brand?: string;
         page?: string;
-    };
+    }>;
 }) {
     return (
         <div className="container py-6">

@@ -9,7 +9,6 @@ export type CartItem = {
   image?: string;
   quantity: number;
   selected: boolean;
-  stock?: number;
 };
 
 type CartStore = {
@@ -22,13 +21,16 @@ type CartStore = {
       selected?: boolean;
     },
   ) => void;
+
   removeFromCart: (id: string) => void;
   increaseQuantity: (id: string) => void;
   decreaseQuantity: (id: string) => void;
+
   removeSelectedItems: () => void;
   clearCart: () => void;
   setCart: (items: CartItem[]) => void;
-  updateItem: (item: { id: string; quantity: number; stock?: number }) => void;
+
+  updateItem: (item: { id: string; quantity: number }) => void;
 
   toggleSelect: (id: string) => void;
   toggleSelectAll: () => void;
@@ -51,16 +53,9 @@ export const useCartStore = create<CartStore>()(
         const existing = items.find((i) => i.productId === item.productId);
 
         if (existing) {
-          if (
-            existing.stock !== undefined &&
-            existing.quantity >= existing.stock
-          ) {
-            return;
-          }
-
           const updatedItem = {
             ...existing,
-            quantity: existing.quantity + 1,
+            quantity: existing.quantity + (item.quantity ?? 1),
             id: item.id || existing.id,
           };
 
@@ -81,7 +76,6 @@ export const useCartStore = create<CartStore>()(
                 image: item.image,
                 quantity: item.quantity ?? 1,
                 selected: item.selected ?? true,
-                stock: item.stock,
               },
               ...items,
             ],
@@ -95,7 +89,9 @@ export const useCartStore = create<CartStore>()(
       toggleSelectAll: () =>
         set((state) => {
           if (state.items.length === 0) return state;
+
           const allSelected = state.items.every((i) => i.selected);
+
           return {
             items: state.items.map((item) => ({
               ...item,
@@ -107,7 +103,7 @@ export const useCartStore = create<CartStore>()(
       /*----------------------------------------------*/
       /*          SELECT SINGLE PRODUCT IN CART       */
       /*----------------------------------------------*/
-      toggleSelect: (id: string) =>
+      toggleSelect: (id) =>
         set((state) => ({
           items: state.items.map((item) =>
             item.id === id ? { ...item, selected: !item.selected } : item,
@@ -117,11 +113,10 @@ export const useCartStore = create<CartStore>()(
       /*------------------------------*/
       /*       REMOVE FROM CART       */
       /*------------------------------*/
-      removeFromCart: (id) => {
+      removeFromCart: (id) =>
         set({
           items: get().items.filter((i) => i.id !== id),
-        });
-      },
+        }),
 
       /*-----------------------------------------------------*/
       /*       REMOVE SELECTED PRODUCTS AFTER CHECKOUT       */
@@ -134,26 +129,17 @@ export const useCartStore = create<CartStore>()(
       /*------------------------------*/
       /*       INCREASE QUANTITY      */
       /*------------------------------*/
-      increaseQuantity: (id) => {
+      increaseQuantity: (id) =>
         set({
-          items: get().items.map((i) => {
-            if (i.id !== id) return i;
-
-            const nextQty = i.quantity + 1;
-
-            if (i.stock !== undefined && nextQty > i.stock) {
-              return i;
-            }
-
-            return { ...i, quantity: nextQty };
-          }),
-        });
-      },
+          items: get().items.map((i) =>
+            i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
+          ),
+        }),
 
       /*------------------------------*/
       /*       DECREASE QUANTITY      */
       /*------------------------------*/
-      decreaseQuantity: (id) => {
+      decreaseQuantity: (id) =>
         set({
           items: get().items.map((i) =>
             i.id === id
@@ -163,8 +149,7 @@ export const useCartStore = create<CartStore>()(
                 }
               : i,
           ),
-        });
-      },
+        }),
 
       /*-----------------------*/
       /*       CLEAR CART      */
@@ -174,29 +159,18 @@ export const useCartStore = create<CartStore>()(
       /*-----------------------*/
       /*       SET CART        */
       /*-----------------------*/
-      setCart: (items) =>
-        set({
-          items: items.map((item) => ({
-            ...item,
-            quantity:
-              item.stock !== undefined && item.quantity > item.stock
-                ? item.stock
-                : item.quantity,
-            stock: item.stock,
-          })),
-        }),
+      setCart: (items) => set({ items }),
 
       /*--------------------------*/
       /*       UPDATE ITEM        */
       /*--------------------------*/
-      updateItem: (item: { id: string; quantity: number; stock?: number }) =>
+      updateItem: (item) =>
         set((state) => ({
           items: state.items.map((i) =>
             i.id === item.id
               ? {
                   ...i,
                   quantity: item.quantity,
-                  stock: item.stock,
                 }
               : i,
           ),
@@ -219,7 +193,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: "cart-storage", // key localStorage
+      name: "cart-storage",
     },
   ),
 );

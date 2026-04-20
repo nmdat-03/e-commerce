@@ -22,7 +22,7 @@ export async function addToCart(productId: string) {
       });
 
       if (!product) throw new Error("PRODUCT_NOT_FOUND");
-      if (product.stock <= 0) throw new Error("OUT_OF_STOCK");
+      if (!product.isActive) throw new Error("UNAVAILABLE");
 
       const existing = await tx.cartItem.findUnique({
         where: {
@@ -30,20 +30,19 @@ export async function addToCart(productId: string) {
         },
       });
 
-      const newQty = (existing?.quantity || 0) + 1;
-
-      if (newQty > product.stock) {
-        throw new Error("EXCEEDS_STOCK");
-      }
-
       if (existing) {
         return await tx.cartItem.update({
           where: { id: existing.id },
-          data: { quantity: newQty },
+          data: {
+            quantity: { increment: 1 },
+          },
           include: {
             product: {
               include: {
-                images: { where: { isPrimary: true }, take: 1 },
+                images: {
+                  where: { isPrimary: true },
+                  take: 1,
+                },
               },
             },
           },
@@ -60,7 +59,10 @@ export async function addToCart(productId: string) {
         include: {
           product: {
             include: {
-              images: { where: { isPrimary: true }, take: 1 },
+              images: {
+                where: { isPrimary: true },
+                take: 1,
+              },
             },
           },
         },
@@ -77,12 +79,14 @@ export async function addToCart(productId: string) {
 }
 
 /*----------------------------------*/
-/*        REMOVE ITEM DB           */
+/*        REMOVE ITEM DB            */
 /*----------------------------------*/
 export async function removeCartItem(cartItemId: string) {
   const user = await getCurrentUser();
 
-  if (!user || !user.cart) return { error: "UNAUTHORIZED" };
+  if (!user || !user.cart) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   const item = await prisma.cartItem.findFirst({
     where: {
@@ -91,7 +95,9 @@ export async function removeCartItem(cartItemId: string) {
     },
   });
 
-  if (!item) return { error: "UNAUTHORIZED" };
+  if (!item) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   await prisma.cartItem.delete({
     where: { id: cartItemId },
@@ -101,35 +107,44 @@ export async function removeCartItem(cartItemId: string) {
 }
 
 /*----------------------------------*/
-/*     INCREASE QUANTITY DB        */
+/*     INCREASE QUANTITY DB         */
 /*----------------------------------*/
 export async function increaseCartItem(cartItemId: string) {
   const user = await getCurrentUser();
 
-  if (!user || !user.cart) return { error: "UNAUTHORIZED" };
+  if (!user || !user.cart) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   const cartId = user.cart.id;
 
   try {
     const result = await prisma.$transaction(async (tx) => {
       const item = await tx.cartItem.findFirst({
-        where: { id: cartItemId, cartId: cartId },
-        include: { product: true },
+        where: {
+          id: cartItemId,
+          cartId,
+        },
+        include: {
+          product: true,
+        },
       });
 
       if (!item) throw new Error("UNAUTHORIZED");
-
-      if (item.quantity >= item.product.stock) {
-        throw new Error("EXCEEDS_STOCK");
-      }
+      if (!item.product.isActive) throw new Error("UNAVAILABLE");
 
       const updated = await tx.cartItem.update({
         where: { id: cartItemId },
-        data: { quantity: { increment: 1 } },
+        data: {
+          quantity: { increment: 1 },
+        },
         include: {
           product: {
             include: {
-              images: { where: { isPrimary: true }, take: 1 },
+              images: {
+                where: { isPrimary: true },
+                take: 1,
+              },
             },
           },
         },
@@ -148,18 +163,25 @@ export async function increaseCartItem(cartItemId: string) {
 }
 
 /*----------------------------------*/
-/*     DECREASE QUANTITY DB        */
+/*     DECREASE QUANTITY DB         */
 /*----------------------------------*/
 export async function decreaseCartItem(cartItemId: string) {
   const user = await getCurrentUser();
 
-  if (!user || !user.cart) return { error: "UNAUTHORIZED" };
+  if (!user || !user.cart) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   const item = await prisma.cartItem.findFirst({
-    where: { id: cartItemId, cartId: user.cart.id },
+    where: {
+      id: cartItemId,
+      cartId: user.cart.id,
+    },
   });
 
-  if (!item) return { error: "UNAUTHORIZED" };
+  if (!item) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   if (item.quantity <= 1) {
     return { error: "MIN_QUANTITY" };
@@ -167,11 +189,16 @@ export async function decreaseCartItem(cartItemId: string) {
 
   const updated = await prisma.cartItem.update({
     where: { id: cartItemId },
-    data: { quantity: { decrement: 1 } },
+    data: {
+      quantity: { decrement: 1 },
+    },
     include: {
       product: {
         include: {
-          images: { where: { isPrimary: true }, take: 1 },
+          images: {
+            where: { isPrimary: true },
+            take: 1,
+          },
         },
       },
     },
@@ -192,30 +219,22 @@ export async function getCart() {
   if (!user || !user.cart) return [];
 
   const items = await prisma.cartItem.findMany({
-    where: { cartId: user.cart.id },
+    where: {
+      cartId: user.cart.id,
+    },
     include: {
       product: {
         include: {
-          images: { where: { isPrimary: true }, take: 1 },
+          images: {
+            where: { isPrimary: true },
+            take: 1,
+          },
         },
       },
     },
   });
 
-  return items.map((item) => {
-    const stock = item.product.stock;
-
-    return {
-      id: item.id,
-      productId: item.productId,
-      name: item.product.name,
-      price: item.price,
-      quantity: Math.min(item.quantity, stock),
-      image: item.product.images[0]?.url,
-      selected: true,
-      stock,
-    };
-  });
+  return items.map(mapCartItem);
 }
 
 /*----------------------------------*/
@@ -224,7 +243,9 @@ export async function getCart() {
 export async function mergeCart(items: any[]) {
   const user = await getCurrentUser();
 
-  if (!user || !user.cart) return { error: "UNAUTHORIZED" };
+  if (!user || !user.cart) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   const cartId = user.cart.id;
 
@@ -235,9 +256,7 @@ export async function mergeCart(items: any[]) {
           where: { id: item.productId },
         });
 
-        if (!product || product.stock <= 0) continue;
-
-        const safeQty = Math.min(item.quantity, product.stock);
+        if (!product || !product.isActive) continue;
 
         await tx.cartItem.upsert({
           where: {
@@ -248,13 +267,13 @@ export async function mergeCart(items: any[]) {
           },
           update: {
             quantity: {
-              increment: safeQty,
+              increment: item.quantity,
             },
           },
           create: {
             cartId,
             productId: item.productId,
-            quantity: safeQty,
+            quantity: item.quantity,
             price: product.price,
           },
         });
@@ -269,7 +288,7 @@ export async function mergeCart(items: any[]) {
 }
 
 /*----------------------------------*/
-/*          HELPER                 */
+/*            HELPER               */
 /*----------------------------------*/
 function mapCartItem(item: any) {
   return {
@@ -280,6 +299,5 @@ function mapCartItem(item: any) {
     quantity: item.quantity,
     image: item.product?.images?.[0]?.url,
     selected: true,
-    stock: item.product?.stock,
   };
 }

@@ -1,56 +1,52 @@
-🛒 E-Commerce Website
+Restaurant Website
 
 A modern full-stack e-commerce web application built with Next.js, featuring product browsing, cart management, and a complete checkout flow.
 
 This project focuses on building a scalable frontend architecture, clean UI/UX, and real-world e-commerce functionalities.
 
-
 ✨ Features
 
 🛍️ User Features
 
-+ Browse product list with responsive UI
+- Browse product list with responsive UI
 
-+ View product details
+- View product details
 
-+ Add/remove items to cart
+- Add/remove items to cart
 
-+ Update quantity in cart
+- Update quantity in cart
 
-+ Checkout flow
+- Checkout flow
 
-+ Authentication (Sign in / Sign up with Clerk)
-
+- Authentication (Sign in / Sign up with Clerk)
 
 ⚙️ System Features
 
-+ Persistent cart using Zustand
+- Persistent cart using Zustand
 
-+ Form validation with React Hook Form + Zod
+- Form validation with React Hook Form + Zod
 
-+ Smooth UI animations (Framer Motion)
+- Smooth UI animations (Framer Motion)
 
-+ Reusable UI components with shadcn/ui
+- Reusable UI components with shadcn/ui
 
-+ Server-side data fetching with Next.js
-
+- Server-side data fetching with Next.js
 
 🛠️ Tech Stack
 
-+ Frontend: Next.js 15, React 19, TypeScript
+- Frontend: Next.js 15, React 19, TypeScript
 
-+ Styling: TailwindCSS, shadcn/ui
+- Styling: TailwindCSS, shadcn/ui
 
-+ State Management: Zustand
+- State Management: Zustand
 
-+ Forms & Validation: React Hook Form, Zod
+- Forms & Validation: React Hook Form, Zod
 
-+ Authentication: Clerk
+- Authentication: Clerk
 
-+ Database: Prisma ORM + PostgreSQL
+- Database: Prisma ORM + PostgreSQL
 
-+ UI & Animation: Framer Motion, Radix UI, Lucide Icons
-
+- UI & Animation: Framer Motion, Radix UI, Lucide Icons
 
 ⚙️ Installation
 
@@ -61,7 +57,6 @@ cd e-commerce
 npm install
 
 npm run dev
-
 
 🔑 Environment Variables
 

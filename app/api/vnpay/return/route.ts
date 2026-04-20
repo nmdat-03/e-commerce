@@ -75,27 +75,26 @@ export async function GET(req: NextRequest) {
       }
 
       if (responseCode === "00") {
-        isSuccess = true;
-
-        await prisma.$transaction([
-          prisma.order.update({
+        await prisma.$transaction(async (tx) => {
+          await tx.order.update({
             where: { id: orderId },
             data: {
               paymentStatus: "PAID",
               paidAt: new Date(),
             },
-          }),
-          prisma.cartItem.deleteMany({
+          });
+
+          await tx.cartItem.deleteMany({
             where: {
               cart: { userId: order.userId },
               productId: {
                 in: order.items.map((i) => i.productId),
               },
             },
-          }),
-        ]);
+          });
+        });
 
-        console.log("RETURN PAYMENT SUCCESS:", orderId);
+        isSuccess = true;
       } else {
         await prisma.order.update({
           where: { id: orderId },
@@ -103,8 +102,6 @@ export async function GET(req: NextRequest) {
             paymentStatus: "FAILED",
           },
         });
-
-        console.log("RETURN PAYMENT FAILED:", orderId);
       }
     } else {
       isSuccess = true;
