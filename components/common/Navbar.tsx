@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Menu, Package, Search, ShoppingCart, X } from "lucide-react";
+import { LogOut, Menu, Package, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { useUser, SignInButton, SignOutButton } from "@clerk/nextjs";
@@ -80,7 +80,7 @@ export default function Navbar() {
                             animate={{ scale: totalItems ? [1, 1.2, 1] : 1 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <ShoppingCart size={20} />
+                            <ShoppingBag size={20} />
                         </motion.div>
                         {hydrated && totalItems > 0 && (
                             <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center bg-black text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">

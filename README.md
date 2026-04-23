@@ -50,9 +50,9 @@ This project focuses on building a scalable frontend architecture, clean UI/UX, 
 
 ⚙️ Installation
 
-git clone https://github.com/nmdat-03/e-commerce.git
+git clone https://github.com/nmdat-03/restaurant.git
 
-cd e-commerce
+cd restaurant
 
 npm install
 

@@ -3,9 +3,32 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, easeInOut } from "framer-motion";
+import { Prisma, OrderStatus } from "@prisma/client";
 import { formatOrderTime, formatPrice } from "@/lib/format";
+import {
+    OrderStatusBadge,
+    PaymentStatusBadge,
+} from "../common/Badges";
 
-export default function OrderCard({ order }: { order: any }) {
+type OrderWithItems = Prisma.OrderGetPayload<{
+    include: {
+        items: {
+            include: {
+                product: {
+                    include: {
+                        images: true;
+                    };
+                };
+            };
+        };
+    };
+}>;
+
+export default function OrderCard({
+    order,
+}: {
+    order: OrderWithItems;
+}) {
     const [open, setOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -29,36 +52,29 @@ export default function OrderCard({ order }: { order: any }) {
         <div className="bg-white border rounded-2xl shadow-sm p-5 space-y-4">
             {/* Header */}
             <div className="flex justify-end">
-                {/* ORDER STATUS */}
                 <div className="flex gap-2 items-center">
                     <p className="text-sm">Order status:</p>
-                    <span
-                        className={`px-3 py-1 text-xs rounded-full font-medium 
-                        ${order.orderStatus === "PENDING"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : order.orderStatus === "CONFIRMED"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : order.orderStatus === "SHIPPING"
-                                        ? "bg-purple-100 text-purple-700"
-                                        : order.orderStatus === "COMPLETED"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700"
-                            }`}
-                    >
-                        {order.orderStatus}
-                    </span>
+                    <OrderStatusBadge status={order.orderStatus} />
                 </div>
             </div>
 
+            {/* Info */}
             <div className="text-sm text-gray-500 space-y-2">
                 <p>
-                    <span className="font-medium text-black">Order ID:</span>{" "}
+                    <span className="font-medium text-black">
+                        Order ID:
+                    </span>{" "}
                     {order.id}
                 </p>
-                <p>{formatOrderTime(order.createdAt)}</p>
-                {/* PAYMENT STATUS */}
-                <div className="flex gap-2 items-center">
-                    {/* METHOD */}
+
+                <p>
+                    <span className="font-medium text-black">
+                        Order Time:
+                    </span>{" "}
+                    {formatOrderTime(order.createdAt)}
+                </p>
+
+                <div className="flex gap-2 items-center flex-wrap">
                     <span className="text-sm font-medium text-black">
                         {order.paymentMethod === "COD"
                             ? "Cash on Delivery (COD)"
@@ -67,39 +83,33 @@ export default function OrderCard({ order }: { order: any }) {
                                 : order.paymentMethod}
                     </span>
 
-                    {/* STATUS */}
-                    <span
-                        className={`px-3 py-1 text-xs rounded-full font-medium 
-                            ${order.paymentStatus === "PENDING"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : order.paymentStatus === "PAID"
-                                    ? "bg-green-100 text-green-700"
-                                    : order.paymentStatus === "FAILED"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-gray-100 text-gray-600"
-                            }`}
-                    >
-                        {order.paymentStatus}
-                    </span>
+                    <PaymentStatusBadge
+                        status={order.paymentStatus}
+                    />
                 </div>
             </div>
 
-            {/* FIRST ITEM */}
+            {/* First Item */}
             {firstItem && (
-                <div className="flex items-center justify-between text-sm border-b pb-3">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between text-sm border-b pb-3 gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                         <Image
-                            src={firstItem.product?.images[0]?.url || "/no-image.png"}
-                            alt={firstItem.product?.name || "Product"}
+                            src={
+                                firstItem.product?.images?.[0]?.url || "/no-image.png"
+                            }
+                            alt={
+                                firstItem.product?.name || "Product"
+                            }
                             width={60}
                             height={60}
-                            className="rounded-lg object-cover border"
+                            className="rounded-lg object-cover border shrink-0"
                         />
 
-                        <div>
-                            <p className="font-medium">
+                        <div className="min-w-0">
+                            <p className="font-medium truncate">
                                 {firstItem.product?.name || "Product"}
                             </p>
+
                             <p className="text-gray-500">
                                 Quantity: x{firstItem.quantity}
                             </p>
@@ -112,11 +122,11 @@ export default function OrderCard({ order }: { order: any }) {
                 </div>
             )}
 
-            {/* DROPDOWN BUTTON */}
+            {/* Toggle */}
             {remainingItems.length > 0 && (
                 <motion.button
-                    onClick={() => setOpen(!open)}
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => setOpen(!open)}
                     className="text-sm text-gray-500 hover:underline"
                 >
                     {open
@@ -125,7 +135,7 @@ export default function OrderCard({ order }: { order: any }) {
                 </motion.button>
             )}
 
-            {/* REMAINING ITEMS */}
+            {/* Remaining Items */}
             <AnimatePresence>
                 {open && (
                     <motion.div
@@ -135,46 +145,55 @@ export default function OrderCard({ order }: { order: any }) {
                         exit="hidden"
                         variants={{
                             visible: {
-                                transition: { staggerChildren: 0.05 }
+                                transition: { staggerChildren: 0.05, },
                             },
-                            hidden: {}
+                            hidden: {},
                         }}
                     >
                         <div className="space-y-3">
-                            {remainingItems.map((item: any) => (
+                            {remainingItems.map((item) => (
                                 <motion.div
                                     key={item.id}
                                     variants={{
-                                        hidden: { opacity: 0, y: -8 },
-                                        visible: { opacity: 1, y: 0 }
+                                        hidden: { opacity: 0, y: -8, },
+                                        visible: { opacity: 1, y: 0, },
                                     }}
-                                    transition={{ duration: 0.4, ease: easeInOut }}
-                                    className="flex items-center justify-between text-sm border-b pb-3"
+                                    transition={{ duration: 0.4, ease: easeInOut, }}
+                                    className="flex items-center justify-between text-sm border-b pb-3 gap-3"
                                 >
-
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
                                         <Image
-                                            src={item.product?.images[0]?.url || "/no-image.png"}
-                                            alt={item.product?.name || "Product"}
+                                            src={
+                                                item.product?.images?.[0]?.url || "/no-image.png"
+                                            }
+                                            alt={
+                                                item.product?.name || "Product"
+                                            }
                                             width={60}
                                             height={60}
-                                            className="rounded-lg object-cover border"
+                                            className="rounded-lg object-cover border shrink-0"
                                         />
 
-                                        <div>
-                                            <p className="font-medium">
+                                        <div className="min-w-0">
+                                            <p className="font-medium truncate">
                                                 {item.product?.name || "Product"}
                                             </p>
+
                                             <p className="text-gray-500">
-                                                Quantity: x{item.quantity}
+                                                Quantity: x
+                                                {
+                                                    item.quantity
+                                                }
                                             </p>
                                         </div>
                                     </div>
 
                                     <p className="font-semibold whitespace-nowrap">
-                                        ${item.price * item.quantity}
+                                        {formatPrice(
+                                            item.price *
+                                            item.quantity
+                                        )}
                                     </p>
-
                                 </motion.div>
                             ))}
                         </div>
@@ -183,21 +202,25 @@ export default function OrderCard({ order }: { order: any }) {
             </AnimatePresence>
 
             {/* Footer */}
-            <div className="flex justify-between items-center">
-                {/* CANCEL BUTTON */}
-                {(order.orderStatus === "PENDING" ||
-                    order.orderStatus === "CONFIRMED") && (
+            <div className="flex justify-between items-center flex-wrap gap-3">
+                {(order.orderStatus ===
+                    OrderStatus.PENDING ||
+                    order.orderStatus ===
+                    OrderStatus.CONFIRMED) && (
                         <button
-                            onClick={() => setShowConfirm(true)}
+                            onClick={() =>
+                                setShowConfirm(true)
+                            }
                             className="px-3 py-1 text-sm bg-red-100 text-red-500 border border-red-500 rounded-md"
                         >
                             Cancel Order
                         </button>
                     )}
 
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-3 items-center flex-wrap">
                     <p className="text-md text-gray-500">
-                        Total payment ({order.items.length} items):
+                        Total payment (
+                        {order.items.length} items):
                     </p>
 
                     <p className="text-lg font-bold">
@@ -205,38 +228,54 @@ export default function OrderCard({ order }: { order: any }) {
                     </p>
                 </div>
             </div>
+
+            {/* Confirm Modal */}
             {showConfirm && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-6 space-y-4 w-96">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+                    <div className="bg-white rounded-xl p-6 space-y-4 w-full max-w-md">
                         <h2 className="text-lg font-semibold">
                             Cancel order?
                         </h2>
 
                         <p className="text-sm text-gray-500">
-                            Are you sure you want to cancel this order?
+                            Are you sure you want to
+                            cancel this order?
                         </p>
 
                         <div className="flex justify-end gap-2">
                             <button
-                                onClick={() => setShowConfirm(false)}
-                                className="px-3 py-1 text-sm border rounded"
+                                onClick={() =>
+                                    setShowConfirm(false)
+                                }
                                 disabled={loading}
+                                className="px-3 py-1 text-sm border rounded"
                             >
                                 No
                             </button>
 
                             <button
+                                disabled={loading}
                                 onClick={async () => {
-                                    setLoading(true);
-                                    await fetch(`/api/orders/${order.id}/cancel`, {
-                                        method: "PATCH",
-                                    });
-                                    window.location.reload();
+                                    try {
+                                        setLoading(true);
+
+                                        await fetch(
+                                            `/api/orders/${order.id}/cancel`,
+                                            {
+                                                method: "PATCH",
+                                            }
+                                        );
+
+                                        window.location.reload();
+                                    } finally {
+                                        setLoading(false);
+                                    }
                                 }}
                                 className="px-3 py-1 text-sm bg-red-500 text-white rounded"
-                                disabled={loading}
                             >
-                                {loading ? "Cancelling..." : "Yes, cancel"}
+                                {loading
+                                    ? "Cancelling..."
+                                    : "Yes, cancel"}
                             </button>
                         </div>
                     </div>

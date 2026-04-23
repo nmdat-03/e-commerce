@@ -1,11 +1,12 @@
 import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { formatPrice } from "@/lib/format";
+import { formatOrderTime, formatPrice } from "@/lib/format";
 import Link from "next/link";
 import UpdateOrderButton from "@/components/admin/UpdateOrderButton";
 import CustomButton from "@/components/common/CustomButton";
 import { ChevronLeft } from "lucide-react";
+import { OrderStatusBadge, PaymentStatusBadge } from "@/components/common/Badges";
 
 export default async function AdminOrderDetailPage({
     params,
@@ -51,38 +52,43 @@ export default async function AdminOrderDetailPage({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* ORDER INFO */}
-                    <div className="bg-white p-4 rounded-xl shadow space-y-2">
+                    <div className="bg-white p-4 rounded-xl shadow space-y-3">
                         <h2 className="font-semibold text-lg">
                             Order Info
                         </h2>
 
-                        <p>
-                            <span className="font-medium">ID:</span>{" "}
+                        <p className="text-sm font-medium">
+                            <span className="text-gray-500">Order ID:</span>{" "}
                             {order.id}
                         </p>
 
-                        <p>
-                            <span className="font-medium">Status:</span>{" "}
-                            {order.orderStatus}
+                        <p className="text-sm font-medium">
+                            <span className="text-gray-500">Order Time:</span>{" "}
+                            {formatOrderTime(order.createdAt)}
                         </p>
 
-                        <p>
-                            <span className="font-medium">Payment:</span>{" "}
-                            {order.paymentStatus}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-500 font-medium">Status:</span>
+                            <OrderStatusBadge status={order.orderStatus} />
+                        </div>
 
-                        <p>
-                            <span className="font-medium">Method:</span>{" "}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-500 font-medium">Payment:</span>
+                            <PaymentStatusBadge status={order.paymentStatus} />
+                        </div>
+
+                        <p className="text-sm font-medium">
+                            <span className="text-sm text-gray-500 font-medium">Method:</span>{" "}
                             {order.paymentMethod}
                         </p>
 
-                        <p>
-                            <span className="font-medium">Total:</span>{" "}
+                        <p className="text-sm font-medium">
+                            <span className="text-gray-500">Total:</span>{" "}
                             {formatPrice(order.total)}
                         </p>
 
                         {/* ACTIONS */}
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-2 justify-end">
                             {order.orderStatus === "PENDING" && (
                                 <>
                                     <UpdateOrderButton
@@ -124,13 +130,15 @@ export default async function AdminOrderDetailPage({
                             User
                         </h2>
 
-                        <p>{order.user?.email}</p>
+                        <p className="text-sm text-gray-600">
+                            {order.user?.email || order.user?.phone}
+                        </p>
 
                         <h2 className="font-semibold text-lg">
                             Receiver
                         </h2>
 
-                        <p className="font-medium">
+                        <p className="text-sm text-gray-600">
                             Full name: {order.fullName}
                         </p>
 
@@ -153,25 +161,36 @@ export default async function AdminOrderDetailPage({
                     {order.items.map((item) => (
                         <div
                             key={item.id}
-                            className="flex justify-between items-center pb-2"
+                            className="flex flex-col"
                         >
-                            <div>
-                                <p className="font-medium">
-                                    {item.product?.name || "Product deleted"}
-                                </p>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium">
+                                        {item.product?.name || "Product deleted"}
+                                    </p>
 
-                                <p className="text-sm text-gray-500">
-                                    Quantity: {item.quantity}
-                                </p>
+                                    <p className="text-sm">
+                                        Quantity: x{item.quantity}
+                                    </p>
+                                </div>
 
-                                <p className="text-sm text-gray-500">
-                                    Price: {formatPrice(item.price)}
-                                </p>
+                                <div>
+                                    <p className="text-sm">
+                                        {formatPrice(item.price)}
+                                    </p>
+                                </div>
                             </div>
 
-                            <p className="font-medium">
-                                {formatPrice(item.price * item.quantity)}
-                            </p>
+                            <div className="border-t border-gray-400 my-3" />
+
+                            <div className="flex justify-end">
+                                <div className="flex gap-2 items-center">
+                                    <p className="text-md text-gray-500">Total payment:</p>
+                                    <span className="text-xl font-medium">
+                                        {formatPrice(item.price * item.quantity)}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
